@@ -3,8 +3,6 @@ require 'mysql2'
 
 
 $LOG_LEVEL = 3 #1 - errors, 2 - warnings, 3 - info, 4 - debug, 5 - trace
-arrow =""
-color="grey"
 
 
 def log(message, level = 3)
