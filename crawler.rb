@@ -49,7 +49,6 @@ KEYWORDS = ''
   page_url += "year[min]=#{YEARS[0]}&year[max]=#{YEARS[1]}&"
 
   page_url += "price[min]=#{pr}&price[max]=#{pr + STEP}&keywords="
-  puts page_url
   page = Nokogiri::HTML(open(page_url))
   flats = page.css('div#pager-top').css('li')
   flats.each do |flat|
