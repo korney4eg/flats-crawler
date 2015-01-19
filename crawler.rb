@@ -3,7 +3,7 @@
 require 'rubygems'
 require 'nokogiri'
 require 'open-uri'
-require 'mysql2'
+require 'connector'
 
 $LOG_LEVEL = 3 # 1 - errors, 2 - warnings, 3 - info, 4 - debug, 5 - trace
 
@@ -11,25 +11,15 @@ def log(message, level = 3)
   puts message if level <= $LOG_LEVEL
 end
 
-con = Mysql2::Client.new(host: 'localhost', username: 'flat',
-                         password: 'flat', database: 'flats')
+con = DBConnector.new('localhost', 'flats', 'flat', 'flat')
 
 def update_price(con, code, address, price, rooms, year)
-  rs = con.query("SELECT code,price from global where code=#{code};")
-  time = Time.new
-  if rs.size == 0
-    con.query("INSERT INTO global(code,address,price,rooms,year)
-              VALUES (#{code},\'#{address}\',#{price},\"#{rooms}\",#{year});")
-    con.query("INSERT INTO price_history VALUES
-              (#{code},#{price},\"#{time.year}-#{time.month}-#{time.day}\");")
-  elsif con.query("SELECT code,price from price_history
-                  where code=#{code};").first['price'].to_i != price
-    log "INSERT INTO price_history VALUES
-          (#{code},#{price},\"#{time.year}-#{time.month}-#{time.day}\");", 4
-    con.query("INSERT INTO price_history VALUES
-              (#{code},#{price},\"#{time.year}-#{time.month}-#{time.day}\");")
-    log "UPDATE global SET price=#{price} WHERE code = #{code});", 4
-    con.query("UPDATE global SET price=#{price} WHERE code = #{code});")
+  if con.code_found(code)
+    con.insert_flat (code, address, price, rooms, year )
+    con.insert_flat_hist (code, price)
+  elsif price != con.get_last_price(code)
+    con.insert_flat_hist(code, price)
+    con.update_flat(code, price)
   else
     log 'nothing to do', 4
   end
