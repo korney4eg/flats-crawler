@@ -3,13 +3,12 @@
 require 'rubygems'
 require 'nokogiri'
 require 'open-uri'
-load 'connector.rb'
-load 'logger.rb'
-
-$LOG_LEVEL = 4 # 1 - errors, 2 - warnings, 3 - info, 4 - debug, 5 - trace
+require './connector'
+require './logger'
 
 # Crawler class
 class FlatCrawler
+  include CrLogger
   def initialize(connection)
     @connection = connection
     @rooms = [1, 2]
@@ -60,7 +59,7 @@ class TSCrawler < FlatCrawler
   def parse_flats
     generate_urls
     @page_urls.each do |url|
-      puts "page url is #{url}"
+      log "Crawling on URL: #{url}",4
       page = Nokogiri::HTML(open(url))
       flats = page.css('div#pager-top').css('li')
       flats.each do |flat|
