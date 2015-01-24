@@ -1,13 +1,14 @@
 require 'mysql2'
 
+# DAO class for flats
 class DBConnector
   def initialize(host, db, user, password)
     @host = host
     @db = db
     @user = user
     @password = password
-    @connection = Mysql2::Client.new(host: @host, database: @db, username: @user,
-       password: @password)
+    @connection = Mysql2::Client.new(host: @host, database: @db,
+      username: @user, password: @password)
   end
 
   def code_found(code)
@@ -15,23 +16,33 @@ class DBConnector
     res.size == 1
   end
 
-  def insert_flat(code, address, price, rooms, year)
+  def add_flat(code, address, price, rooms, year)
     @connection.query('INSERT INTO global VALUES '\
                 "(#{code},\'#{address}\',#{price},\"#{rooms}\",#{year});")
   end
 
-  def instert_flat_hist(code, price)
+  def add_flat_hist(code, price)
     time = Time.now
-    @connection.query('INSERT INTO price_history VALUES'\
+    @connection.query('INSERT INTO price_history (code, price, date)VALUES'\
       "(#{code},#{price},\"#{time.year}-#{time.month}-#{time.day}\");")
   end
 
   def get_last_price(code)
-    @connection.query('SELECT code,price from price_history'\
-                 " where code=#{code} ORDER BY date DESC;").first['price'].to_i
+    price = @connection.query('SELECT price from price_history'\
+                 " where code=#{code} ORDER BY date DESC LIMIT 1;")
+    if price.size > 0
+      price.first['price'].to_i
+    else
+      warn 'History of flat is broken ...'
+      0
+    end
   end
 
   def update_flat(code, price)
-    @connection.query("UPDATE global SET price=#{price} WHERE code = #{code});")
+    @connection.query("UPDATE global SET price=#{price} WHERE code = #{code};")
   end
-end 
+
+  def close
+    @connection.close
+  end
+end

@@ -1,9 +1,9 @@
-#!/usr/bin/env ruby
+#!/usr/bin/ruby -w
 
 require 'rubygems'
 require 'nokogiri'
 require 'open-uri'
-require 'connector'
+load 'connector.rb'
 
 $LOG_LEVEL = 3 # 1 - errors, 2 - warnings, 3 - info, 4 - debug, 5 - trace
 
@@ -11,15 +11,15 @@ def log(message, level = 3)
   puts message if level <= $LOG_LEVEL
 end
 
-con = DBConnector.new('localhost', 'flats', 'flat', 'flat')
+connection = DBConnector.new('localhost', 'flats', 'flat', 'flat')
 
-def update_price(con, code, address, price, rooms, year)
-  if con.code_found(code)
-    con.insert_flat (code, address, price, rooms, year )
-    con.insert_flat_hist (code, price)
-  elsif price != con.get_last_price(code)
-    con.insert_flat_hist(code, price)
-    con.update_flat(code, price)
+def update_price(db, code, address, price, rooms, year)
+  if !db.code_found(code)
+    db.add_flat(code, address, price, rooms, year)
+    db.add_flat_hist(code, price)
+  elsif price != db.get_last_price(code)
+    db.add_flat_hist(code, price)
+    db.update_flat(code, price)
   else
     log 'nothing to do', 4
   end
@@ -47,7 +47,7 @@ KEYWORDS = ''
     rooms = flat.css('td[class=rooms]').text.gsub(' ', '').gsub(/\t/, '').sub(/\n/, '')
     year = flat.css('td[class=year]').text.to_i
     code = flat.css('td[class=code]').text.to_i
-    update_price(con, code, address, price, rooms, year)
+    update_price(connection, code, address, price, rooms, year)
   end
 end
-con.close if con
+connection.close
