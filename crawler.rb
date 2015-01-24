@@ -1,9 +1,9 @@
-#!/usr/bin/env ruby
+#!/usr/bin/ruby -w
 
 require 'rubygems'
 require 'nokogiri'
 require 'open-uri'
-require 'mysql2'
+load 'connector.rb'
 
 $LOG_LEVEL = 4 # 1 - errors, 2 - warnings, 3 - info, 4 - debug, 5 - trace
 
@@ -11,24 +11,15 @@ def log(message, level = 3)
   puts message if level <= $LOG_LEVEL
 end
 
-con = Mysql2::Client.new(host: 'localhost', username: 'flat',
-                         password: 'flat', database: 'flats')
+connection = DBConnector.new('localhost', 'flats', 'flat', 'flat')
 
-def update_price(con, code, address, price, rooms, year)
-  rs = con.query("SELECT code,price from global where code=#{code};")
-  time = Time.new
-  if rs.size == 0
-    con.query("INSERT INTO global(code,address,price,rooms,year)
-              VALUES (#{code},\'#{address}\',#{price},\"#{rooms}\",#{year});")
-    con.query("INSERT INTO price_history (code, price, date) VALUES
-              (#{code},#{price},\"#{time.year}-#{time.month}-#{time.day}\");")
-  elsif rs.first['price'].to_i != price
-    log "INSERT INTO price_history(code, price, date) VALUES
-          (#{code},#{price},\"#{time.year}-#{time.month}-#{time.day}\");", 4
-    con.query("INSERT INTO price_history (code, price, date) VALUES
-              (#{code},#{price},\"#{time.year}-#{time.month}-#{time.day}\");")
-    log "UPDATE global SET price=#{price} WHERE code = #{code});", 4
-    con.query("UPDATE global SET price=#{price} WHERE code = #{code};")
+def update_price(db, code, address, price, rooms, year)
+  if !db.code_found(code)
+    db.add_flat(code, address, price, rooms, year)
+    db.add_flat_hist(code, price)
+  elsif price != db.get_last_price(code)
+    db.add_flat_hist(code, price)
+    db.update_flat(code, price)
   else
     log 'nothing to do', 4
   end
@@ -56,7 +47,7 @@ KEYWORDS = ''
     rooms = flat.css('td[class=rooms]').text.gsub(' ', '').gsub(/\t/, '').sub(/\n/, '')
     year = flat.css('td[class=year]').text.to_i
     code = flat.css('td[class=code]').text.to_i
-    update_price(con, code, address, price, rooms, year)
+    update_price(connection, code, address, price, rooms, year)
   end
 end
-con.close if con
+connection.close
