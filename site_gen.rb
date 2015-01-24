@@ -1,11 +1,8 @@
 #!/usr/bin/ruby -w
 require 'mysql2'
-
-$LOG_LEVEL = 3 # 1 - errors, 2 - warnings, 3 - info, 4 - debug, 5 - trace
-
-def log(message, level = 3)
-  puts message if level <= $LOG_LEVEL
-end
+require './connector'
+require './logger'
+include Logger
 
 def render_html(flats, days)
   i = 0
@@ -15,13 +12,13 @@ def render_html(flats, days)
   puts('</head>')
   puts('<BODY>')
   puts('<TABLE border=1>')
-  puts('\t<TR>')
-  puts('\t\t<TD>#')
-  puts('\t\t<TD>Код')
-  puts('\t\t<TD>Адрес')
-  puts('\t\t<TD>Цена $')
-  puts('\t\t<TD>комнат')
-  puts('\t\t<TD>год постройки')
+  puts("\t<TR>")
+  puts("\t\t<TD>#")
+  puts("\t\t<TD>Код")
+  puts("\t\t<TD>Адрес")
+  puts("\t\t<TD>Цена $")
+  puts("\t\t<TD>комнат")
+  puts("\t\t<TD>год постройки")
   days.each { |day| puts("\t\t<TD>#{day}") }
   flats.each_pair do |code, info|
     i += 1

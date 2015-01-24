@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -w
+#!/usr/bin/ruby
 
 require 'rubygems'
 require 'nokogiri'
@@ -31,9 +31,11 @@ class FlatCrawler
 
   def update_price(code, address, price, rooms, year)
     if !@connection.code_found(code)
+      log "New flat:#{address} cost #{price}$ #{rooms} rooms, #{year}" , 3
       @connection.add_flat(code, address, price, rooms, year)
       @connection.add_flat_hist(code, price)
     elsif price != @connection.get_last_price(code)
+      log "Updated flat:#{code} cost #{price}$" , 3
       @connection.add_flat_hist(code, price)
       @connection.update_flat(code, price)
     else
