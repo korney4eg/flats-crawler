@@ -35,7 +35,7 @@ class FlatCrawler
       @connection.add_flat(code, address, price, rooms, year)
       @connection.add_flat_hist(code, price)
     elsif price != @connection.get_last_price(code)
-      log "Updated flat:#{code} cost #{price}$" , 3
+      log "Updated flat:#{code} cost from #{@connection.get_last_price(code)} -> #{price}$" , 3
       @connection.add_flat_hist(code, price)
       @connection.update_flat(code, price)
     else

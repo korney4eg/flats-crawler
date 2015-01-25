@@ -1,8 +1,8 @@
 #!/usr/bin/ruby -w
 require 'mysql2'
 require './connector'
-require './logger'
-include Logger
+#require './logger'
+#include Logger
 
 def render_html(flats, days)
   i = 0
