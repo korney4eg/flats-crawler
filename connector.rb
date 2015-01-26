@@ -17,7 +17,7 @@ class DBConnector
   end
 
   def add_flat(code, address, price, rooms, year)
-    @connection.query('INSERT INTO global VALUES '\
+    @connection.query('INSERT INTO global (code, address, price, rooms, year) VALUES '\
                 "(#{code},\'#{address}\',#{price},\"#{rooms}\",#{year});")
   end
 
