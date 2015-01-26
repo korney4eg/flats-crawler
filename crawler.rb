@@ -49,7 +49,7 @@ class TSCrawler < FlatCrawler
   def generate_urls
     (@price[0]..@price[1]).step(@step) do |pr|
       page_url = 'http://www.t-s.by/buy/flats/?'
-      @rooms.each { |room| page_url += "rooms[#{room}]=#{room}&" }
+#      @rooms.each { |room| page_url += "rooms[#{room}]=#{room}&" }
       @areas.each { |area| page_url += "area[#{area}]=#{area}&" }
       page_url += 'daybefore=1&'
       page_url += "year[min]=#{@years[0]}&year[max]=#{@years[1]}&"
