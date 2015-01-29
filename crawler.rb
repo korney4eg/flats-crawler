@@ -30,14 +30,21 @@ class FlatCrawler
   end
 
   def update_price(code, address, price, rooms, year)
-    if !@connection.code_found(code)
+    code_found = @connection.code_found(code)
+    last_price = @connection.get_last_price(code)
+    if !code_found
       log "New flat:#{address} cost #{price}$ #{rooms} rooms, #{year}" , 3
       @connection.add_flat(code, address, price, rooms, year)
       @connection.add_flat_hist(code, price)
-    elsif price != @connection.get_last_price(code)
-      log "Updated flat:#{code} cost from #{@connection.get_last_price(code)} -> #{price}$" , 3
+    elsif price != last_price
+      if price < last_price
+	status = 'down'
+      else
+	status = 'up'
+      end
+      log "Updated flat:#{code} cost from #{last_price} -> #{price}$" , 3
       @connection.add_flat_hist(code, price)
-      @connection.update_flat(code, price)
+      @connection.update_flat(code, price, status)
     else
       log 'nothing to do', 4
     end

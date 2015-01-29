@@ -17,8 +17,8 @@ class DBConnector
   end
 
   def add_flat(code, address, price, rooms, year)
-    @connection.query('INSERT INTO global (code, address, price, rooms, year) VALUES '\
-                "(#{code},\'#{address}\',#{price},\"#{rooms}\",#{year});")
+    @connection.query('INSERT INTO global (code, address, price, rooms, year,status) VALUES '\
+                "(#{code},\'#{address}\',#{price},\"#{rooms}\",#{year},\"new\");")
   end
 
   def add_flat_hist(code, price)
@@ -38,8 +38,8 @@ class DBConnector
     end
   end
 
-  def update_flat(code, price)
-    @connection.query("UPDATE global SET price=#{price} WHERE code = #{code};")
+  def update_flat(code, price, status)
+    @connection.query("UPDATE global SET price=#{price} status=#{status} WHERE code = #{code};")
   end
 
   def close
