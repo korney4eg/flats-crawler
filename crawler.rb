@@ -29,6 +29,33 @@ class FlatCrawler
   def generate_urls
   end
 
+  def full_reindex
+    flats_from_hist = @connection.get_history() # select date, code from price_history order  by date
+    all_codes = {}
+    status = {}
+    prev_codes = []
+    flats_from_hist.each_pair do |date, flats| 
+      flats.each do |flat|
+        flat.each_pair do |code, price|
+          if all_codes.keys.include?(code)
+            if all_codes[code] > price
+              status[code] = 'down'
+            elsif all_codes[code] < price
+              status[code] = 'up'
+            end
+          else
+            status[code] = 'new'
+          end
+          if flats_from_hist.values.last != date and status[code] == 'new'
+            status[code] = ''
+          end
+        all_codes[code] = price
+        end
+      end
+    end
+    all_codes.each_pair { |code, price|  @connection.update_flat(code, price, status[code])}
+  end
+
   def update_price(code, address, price, rooms, year)
     code_found = @connection.code_found(code)
     last_price = @connection.get_last_price(code)
@@ -87,4 +114,5 @@ connection = DBConnector.new('localhost', 'flats', 'flat', 'flat')
 
 ts = TSCrawler.new(connection)
 ts.parse_flats
+#ts.full_reindex
 connection.close

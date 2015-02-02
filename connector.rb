@@ -37,6 +37,28 @@ class DBConnector
       0
     end
   end
+  
+  def get_history
+    flats = {}
+    dates = get_dates
+    dates.each do |date|
+      flats[date] = []
+      @connection.query("select code,price from price_history where date = '#{date}';").each do |flat|
+        flats[date] += [ {flat['code'] => flat['price']} ]
+#        puts "code = #{flat['code']}, price = #{flat['price']}"
+      end
+    end
+    flats
+  end
+
+  def get_dates
+    dates = []
+    results = @connection.query('select distinct date from price_history;')
+    results.each do |result|
+      dates += [result['date']]
+    end
+    dates
+  end
 
   def update_flat(code, price, status)
     @connection.query("UPDATE global SET price=#{price}, status=\"#{status}\" WHERE code = #{code};")
