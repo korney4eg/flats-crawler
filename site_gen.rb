@@ -17,6 +17,7 @@ def render_html(flats, days)
   puts("\t\t<TD>Код")
   puts("\t\t<TD>Адрес")
   puts("\t\t<TD>Цена $")
+  puts("\t\t<TD>stat")
   puts("\t\t<TD>комнат")
   puts("\t\t<TD>год постройки")
   days.each { |day| puts("\t\t<TD>#{day}") }
@@ -34,7 +35,18 @@ def render_html(flats, days)
     puts("\t\t<TD>#{i}")
     puts("\t\t<TD>#{code}")
     puts("\t\t<TD><a href='http://www.t-s.by/buy/flats/#{code}' >#{info['address']}</a>")
+    status_char = ''
+    if info['status'] == 'down'
+      status_char = "<span style=\"color:green\">&#8601;</span>"
+    elsif info['status'] == 'up'
+      status_char = "<span style=\"color:red\">&#8598;</span>"
+    elsif info['status'] == 'new'
+      status_char = "<span style=\"color:yellow\">&#8687;</span>"
+    else 
+      status_char = "&nbsp;"
+    end
     puts("\t\t<TD>#{info['price']}$")
+    puts("\t\t<TD>#{status_char}")
     puts("\t\t<TD>#{info['rooms']}")
     puts("\t\t<TD>#{info['year']}")
     days_arr.each { |day| puts("\t\t<TD>#{day}") }
@@ -61,7 +73,7 @@ def render(flats, days)
       if info['history'].keys.include? day
         days_arr += [info['history'][day]]
       else
-        days_arr += [' -- ']
+        days_arr += [' ']
       end
     end
     printf(table, i, code, info['address'], info['price'],
@@ -81,6 +93,7 @@ con.query('SELECT * from global ORDER BY price;').each do |sets|
                           'price'  => sets['price'],
                           'rooms'  => sets['rooms'],
                           'year'   => sets['year'],
+                          'status'   => sets['status'],
                           'history' => {} }
   dates.each do |d|
     days += [d['date']] unless days.include? d['date']
