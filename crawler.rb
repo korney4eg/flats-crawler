@@ -30,11 +30,10 @@ class FlatCrawler
   end
 
   def full_reindex
-    flats_from_hist = @connection.get_history() # select date, code from price_history order  by date
+    flats_from_hist = @connection.get_history
     all_codes = {}
     status = {}
-    prev_codes = []
-    flats_from_hist.each_pair do |date, flats| 
+    flats_from_hist.each_pair do |date, flats|
       flats.each do |flat|
         flat.each_pair do |code, price|
           if all_codes.keys.include?(code)
@@ -46,30 +45,30 @@ class FlatCrawler
           else
             status[code] = 'new'
           end
-          if flats_from_hist.values.last != date and status[code] == 'new'
+          if flats_from_hist.values.last != date && status[code] == 'new'
             status[code] = ''
           end
-        all_codes[code] = price
+          all_codes[code] = price
         end
       end
     end
-    all_codes.each_pair { |code, price|  @connection.update_flat(code, price, status[code])}
+    all_codes.each_pair { |code, price|  @connection.update_flat(code, price, status[code]) }
   end
 
   def update_price(code, address, price, rooms, year)
     code_found = @connection.code_found(code)
     last_price = @connection.get_last_price(code)
     if !code_found
-      log "New flat:#{address} cost #{price}$ #{rooms} rooms, #{year}" , 3
+      log "New flat:#{address} cost #{price}$ #{rooms} rooms, #{year}", 3
       @connection.add_flat(code, address, price, rooms, year)
       @connection.add_flat_hist(code, price)
     elsif price != last_price
       if price < last_price
-	status = 'down'
+        status = 'down'
       else
-	status = 'up'
+        status = 'up'
       end
-      log "Updated flat:#{code} cost from #{last_price} -> #{price}$" , 3
+      log "Updated flat:#{code} cost from #{last_price} -> #{price}$", 3
       @connection.add_flat_hist(code, price)
       @connection.update_flat(code, price, status)
     else
@@ -83,7 +82,7 @@ class TSCrawler < FlatCrawler
   def generate_urls
     (@price[0]..@price[1]).step(@step) do |pr|
       page_url = 'http://www.t-s.by/buy/flats/?'
-#      @rooms.each { |room| page_url += "rooms[#{room}]=#{room}&" }
+      # @rooms.each { |room| page_url += "rooms[#{room}]=#{room}&" }
       @areas.each { |area| page_url += "area[#{area}]=#{area}&" }
       page_url += 'daybefore=1&'
       page_url += "year[min]=#{@years[0]}&year[max]=#{@years[1]}&"
@@ -95,7 +94,7 @@ class TSCrawler < FlatCrawler
   def parse_flats
     generate_urls
     @page_urls.each do |url|
-      log "Crawling on URL: #{url}",4
+      log "Crawling on URL: #{url}", 4
       page = Nokogiri::HTML(open(url))
       flats = page.css('div#pager-top').css('li')
       flats.each do |flat|
@@ -114,5 +113,5 @@ connection = DBConnector.new('localhost', 'flats', 'flat', 'flat')
 
 ts = TSCrawler.new(connection)
 ts.parse_flats
-#ts.full_reindex
+# ts.full_reindex
 connection.close

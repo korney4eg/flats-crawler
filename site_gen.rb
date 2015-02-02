@@ -1,8 +1,8 @@
 #!/usr/bin/ruby -w
 require 'mysql2'
 require './connector'
-#require './logger'
-#include Logger
+# require './logger'
+# include Logger
 
 def render_html(flats, days)
   i = 0
@@ -34,7 +34,8 @@ def render_html(flats, days)
     puts("\t<TR>")
     puts("\t\t<TD>#{i}")
     puts("\t\t<TD>#{code}")
-    puts("\t\t<TD><a href='http://www.t-s.by/buy/flats/#{code}' >#{info['address']}</a>")
+    puts("\t\t<TD><a href='http://www.t-s.by/buy/flats/#{code}'"\
+         " >#{info['address']}</a>")
     status_char = ''
     if info['status'] == 'down'
       status_char = "<span style=\"color:green\">&#8601;</span>"
@@ -42,8 +43,8 @@ def render_html(flats, days)
       status_char = "<span style=\"color:red\">&#8598;</span>"
     elsif info['status'] == 'new'
       status_char = "<span style=\"color:yellow\">&#8687;</span>"
-    else 
-      status_char = "&nbsp;"
+    else
+      status_char = '&nbsp;'
     end
     puts("\t\t<TD>#{info['price']}$")
     puts("\t\t<TD>#{status_char}")
