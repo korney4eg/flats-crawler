@@ -39,7 +39,7 @@ class DBConnector
   end
 
   def update_flat(code, price, status)
-    @connection.query("UPDATE global SET price=#{price} status=#{status} WHERE code = #{code};")
+    @connection.query("UPDATE global SET price=#{price}, status=\"#{status}\" WHERE code = #{code};")
   end
 
   def close
