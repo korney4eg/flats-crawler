@@ -64,6 +64,10 @@ class DBConnector
     @connection.query("UPDATE global SET price=#{price}, status=\"#{status}\" WHERE code = #{code};")
   end
 
+  def update_area(code, area)
+    @connection.query("UPDATE global SET area=#{area} WHERE code = #{code};")
+  end
+  
   def close
     @connection.close
   end

@@ -14,7 +14,8 @@ class FlatCrawler
     @rooms = [1, 2]
     @price = [20_000, 140_000]
     @step = 10_000
-    @areas = [32, 33, 36, 40, 41, 43]
+    #@areas = [32, 33, 36, 40, 41, 43]
+    @areas = *(1..67)
     @years = [0, 2_016]
     @keywords = ''
     @page_urls = []
@@ -59,8 +60,8 @@ class FlatCrawler
     code_found = @connection.code_found(code)
     last_price = @connection.get_last_price(code)
     if !code_found
-      log "New flat:#{address} cost #{price}$ #{rooms} rooms, #{year}", 3
-      @connection.add_flat(code, address, price, rooms, year)
+      log "New flat:#{address} on area #{area} cost #{price}$ #{rooms} rooms, #{year}", 3
+      @connection.add_flat(code, area, address, price, rooms, year)
       @connection.add_flat_hist(code, price)
     elsif price != last_price
       if price < last_price
@@ -74,21 +75,23 @@ class FlatCrawler
     else
       log 'nothing to do', 4
     end
+    @connection.update_area(code, area)
   end
 end
 
 # tvoya stalica crawler
 class TSCrawler < FlatCrawler
   def generate_urls
-    (@price[0]..@price[1]).step(@step) do |pr|
-      page_url = 'http://www.t-s.by/buy/flats/?'
-      # @rooms.each { |room| page_url += "rooms[#{room}]=#{room}&" }
-      @areas.each { |area| page_url += "area[#{area}]=#{area}&" }
-      page_url += 'daybefore=1&'
-      page_url += "year[min]=#{@years[0]}&year[max]=#{@years[1]}&"
-      page_url += "price[min]=#{pr}&price[max]=#{pr + @step}&keywords="
-      @page_urls += [page_url]
-    end
+    @areas.each do |area|
+      (@price[0]..@price[1]).step(@step) do |pr|
+        page_url = 'http://www.t-s.by/buy/flats/?'
+        # @rooms.each { |room| page_url += "rooms[#{room}]=#{room}&" }
+        page_url += "area[#{area}]=#{area}&"
+        page_url += 'daybefore=1&'
+        page_url += "year[min]=#{@years[0]}&year[max]=#{@years[1]}&"
+        page_url += "price[min]=#{pr}&price[max]=#{pr + @step}&keywords="
+        @page_urls += [page_url]
+      end
   end
 
   def parse_flats
