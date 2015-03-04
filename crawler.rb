@@ -56,7 +56,7 @@ class FlatCrawler
     all_codes.each_pair { |code, price|  @connection.update_flat(code, price, status[code]) }
   end
 
-  def update_price(code, address, price, rooms, year)
+  def update_price(code, area, address, price, rooms, year)
     code_found = @connection.code_found(code)
     last_price = @connection.get_last_price(code)
     if !code_found
@@ -99,6 +99,7 @@ class TSCrawler < FlatCrawler
     generate_urls
     @page_urls.each do |url|
       log "Crawling on URL: #{url}", 4
+      area = url.gsub(/=.*$/,'').gsub(/^.*area\[/,'').gsub(']','').to_i
       page = Nokogiri::HTML(open(url))
       flats = page.css('div#pager-top').css('li')
       flats.each do |flat|
@@ -107,7 +108,7 @@ class TSCrawler < FlatCrawler
         rooms = flat.css('td[class=rooms]').text.gsub(' ', '').gsub(/\t/, '').sub(/\n/, '')
         year = flat.css('td[class=year]').text.to_i
         code = flat.css('td[class=code]').text.to_i
-        update_price(code, address, price, rooms, year)
+        update_price(code, area, address, price, rooms, year)
       end
     end
   end
