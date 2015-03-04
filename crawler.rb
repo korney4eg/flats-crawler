@@ -92,6 +92,7 @@ class TSCrawler < FlatCrawler
         page_url += "price[min]=#{pr}&price[max]=#{pr + @step}&keywords="
         @page_urls += [page_url]
       end
+    end
   end
 
   def parse_flats
