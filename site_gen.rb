@@ -88,7 +88,7 @@ dates = con.query('SELECT distinct date from price_history order by date desc;')
 days = []
 i = 0
 flats = {}
-con.query('SELECT * from global ORDER BY price;').each do |sets|
+con.query('SELECT * from global where area in (32, 33, 36, 40, 41, 43) ORDER BY price;').each do |sets|
   i += 1
   flats[sets['code']] = { 'address' => sets['address'],
                           'price'  => sets['price'],
