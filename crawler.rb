@@ -13,7 +13,7 @@ class FlatCrawler
     @connection = connection
     @rooms = [1, 2]
     @price = [20_000, 140_000]
-    @step = 30_000
+    @step = 50_000
     #@areas = [32, 33, 36, 40, 41, 43]
     @areas = *(1..67)
     @years = [0, 2_016]
