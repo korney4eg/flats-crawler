@@ -60,8 +60,21 @@ class DBConnector
     dates
   end
 
+  def get_all_flats
+    all_flats = []
+    result = @connection.query("SELECT code FROM global where status != 'sold';")
+    result.each do |res|
+#      puts res['code']['code']
+      all_flats << res['code']['code']
+    end
+  end
+
   def update_flat(code, price, status)
     @connection.query("UPDATE global SET price=#{price}, status=\"#{status}\" WHERE code = #{code};")
+  end
+
+  def update_status(code, status)
+    @connection.query("UPDATE global SET status=\"#{status}\" WHERE code = #{code};")
   end
 
   def update_area(code, area)

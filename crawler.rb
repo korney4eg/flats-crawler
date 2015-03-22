@@ -14,11 +14,12 @@ class FlatCrawler
     @rooms = [1, 2]
     @price = [20_000, 140_000]
     @step = 50_000
-    #@areas = [32, 33, 36, 40, 41, 43]
+    # @areas = [32, 33, 36, 40, 41, 43]
     @areas = *(1..67)
     @years = [0, 2_016]
     @keywords = ''
     @page_urls = []
+    @active_flats = []
   end
 
   def parse_flats
@@ -77,6 +78,16 @@ class FlatCrawler
     end
     @connection.update_area(code, area)
   end
+  
+  def mark_sold
+    puts @active_flats.inspect
+    puts @connection.get_all_flats.inspect
+    flats_to_mark_sold = @connection.get_all_flats - @active_flats
+    flats_to_mark_sold.each do |flat|
+      #@connection.update_status(flat, 'sold')
+      #puts "#{flat} to mark as sold"
+    end
+  end
 end
 
 # tvoya stalica crawler
@@ -109,8 +120,10 @@ class TSCrawler < FlatCrawler
         year = flat.css('td[class=year]').text.to_i
         code = flat.css('td[class=code]').text.to_i
         update_price(code, area, address, price, rooms, year)
+        @active_flats << code
       end
     end
+    mark_sold
   end
 end
 
