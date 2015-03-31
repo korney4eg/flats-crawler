@@ -34,7 +34,7 @@ def render_html(flats, days)
     puts("\t<TR>")
     puts("\t\t<TD>#{i}")
     puts("\t\t<TD>#{code}")
-    puts("\t\t<TD><a href='http://www.t-s.by/buy/flats/#{code}'"\
+    puts("\t\t<TD><a href='http://www.t-s.by/buy/flats/#{code}/'"\
          " >#{info['address']}</a>")
     status_char = ''
     if info['status'] == 'down'
