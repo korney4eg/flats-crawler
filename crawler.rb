@@ -80,12 +80,12 @@ class FlatCrawler
   end
   
   def mark_sold
-    puts @active_flats.inspect
-    puts @connection.get_all_flats.inspect
+    #puts @active_flats.inspect
+    #puts @connection.get_all_flats.inspect
     flats_to_mark_sold = @connection.get_all_flats - @active_flats
     flats_to_mark_sold.each do |flat|
       #@connection.update_status(flat, 'sold')
-      #puts "#{flat} to mark as sold"
+      puts "#{flat} to mark as sold"
     end
   end
 end
