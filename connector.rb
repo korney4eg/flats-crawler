@@ -63,10 +63,7 @@ class DBConnector
   def get_all_flats
     all_flats = []
     result = @connection.query("SELECT code FROM global where status != 'sold';")
-    result.each do |res|
-#      puts res['code']['code']
-      all_flats << res['code']['code']
-    end
+    all_flats = result.map { |res| res['code']}
   end
 
   def update_flat(code, price, status)
