@@ -112,10 +112,10 @@ class TSCrawler < FlatCrawler
       log "Crawling on URL: #{url}", 4
       area = url.gsub(/=.*$/,'').gsub(/^.*area\[/,'').gsub(']','').to_i
       page = Nokogiri::HTML(open(url))
-      flats = page.css('div#pager-top').css('li')
+      flats = page.css('ul#pager-list').css('li')
       flats.each do |flat|
         address = flat.css('td[class=address]').css('span').text
-        price = flat.css('td[class=price]').text.sub('$', '').gsub(' ', '').to_i
+        price = flat.css('td').css('div.usd_price')[0].text.gsub(/[^\d]/, '').to_i
         rooms = flat.css('td[class=rooms]').text.gsub(' ', '').gsub(/\t/, '').sub(/\n/, '')
         year = flat.css('td[class=year]').text.to_i
         code = flat.css('td[class=code]').text.to_i

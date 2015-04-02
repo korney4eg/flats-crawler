@@ -71,7 +71,7 @@ class FlatViewer
     puts("\t<TR>")
     puts("\t\t<TD>#{num}")
     puts("\t\t<TD>#{code}")
-    puts("\t\t<TD><a href='http://www.t-s.by/buy/flats/#{code}'"\
+    puts("\t\t<TD><a href='http://www.t-s.by/buy/flats/#{code}/'"\
          " >#{info['address']}</a>")
     puts("\t\t<TD>#{info['price']}$")
     puts("\t\t<TD>#{get_status_symb(info['status'])}")
