@@ -15,14 +15,20 @@ class JSONConnector
   end
 
   def add_flat(code, area, address, price, rooms, year)
-    @data['flats'][ code ] = {'area': area, 'address': address, 'price':price,\
-                              'rooms':rooms, 'year':year,'history':{}}
+    @data['flats'][ code ] = {}
+    @data['flats'][code]['area'] = area
+    @data['flats'][code]['address'] =  address
+    @data['flats'][code]['price'] = price
+    @data['flats'][code]['rooms'] = rooms
+    @data['flats'][code]['year'] = year
+    @data['flats'][code]['history'] = {}
+
     time = Time.now
     add_flat_hist(code, price,"#{time.year}-#{time.month}-#{time.day}" )
   end
 
   def add_flat_hist(code, price, date ="#{Time.now.year}-#{Time.now.month}-#{Time.now.day}" )
-    @data['flats'][code][:history][ date ] = price
+    @data['flats'][code]['history'][ date ] = price
   end
 
   def found_code?(code)
@@ -32,7 +38,7 @@ class JSONConnector
   def get_last_price(code)
     # puts "last price: #{ @data}"
     if found_code?(code)
-      @data['flats'][code][:price]
+      @data['flats'][code]['price']
     else
       0
     end
@@ -55,6 +61,7 @@ class JSONConnector
   def get_dates
     dates = []
     @data['flats'].values.each do |flat|
+      # puts flat['history']
       flat['history'].keys.each do |date|
         dates << date if not dates.include?(date)
       end
@@ -67,7 +74,7 @@ class JSONConnector
   end
 
   def update_flat(code, price)
-    @data['flats'][code][:price] = price
+    @data['flats'][code]['price'] = price
     time = Time.now
     add_flat_hist(code,price,"#{time.year}-#{time.month}-#{time.day}")
   end
