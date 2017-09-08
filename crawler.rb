@@ -3,20 +3,20 @@
 require 'rubygems'
 require 'nokogiri'
 require 'open-uri'
-require './connector'
-require './logger'
+require './lib/connector-json.rb'
+require './lib/logger'
 
 # Crawler class
 class FlatCrawler
   include CrLogger
   def initialize(connection)
     @connection = connection
-    @rooms = [1, 2]
-    @price = [20_000, 140_000]
-    @step = 50_000
+    @rooms = [1]
+    @price = [20_000, 60_000]
+    @step = 10_000
     # @areas = [32, 33, 36, 40, 41, 43]
-    @areas = *(1..67)
-    @years = [0, 2_016]
+    @areas = *(1..5)
+    @years = [0, 2_017]
     @keywords = ''
     @page_urls = []
     @active_flats = []
@@ -58,12 +58,11 @@ class FlatCrawler
   end
 
   def update_price(code, area, address, price, rooms, year)
-    code_found = @connection.code_found(code)
+    code_found = @connection.found_code?(code)
     last_price = @connection.get_last_price(code)
     if !code_found
       log "New flat:#{address} on area #{area} cost #{price}$ #{rooms} rooms, #{year}", 3
       @connection.add_flat(code, area, address, price, rooms, year)
-      @connection.add_flat_hist(code, price)
     elsif price != last_price
       if price < last_price
         status = 'down'
@@ -72,7 +71,7 @@ class FlatCrawler
       end
       log "Updated flat:#{code} cost from #{last_price} -> #{price}$", 3
       @connection.add_flat_hist(code, price)
-      @connection.update_flat(code, price, status)
+      @connection.update_flat(code, price)
     else
       log 'nothing to do', 4
     end
@@ -82,9 +81,9 @@ class FlatCrawler
   def mark_sold
     #puts @active_flats.inspect
     #puts @connection.get_all_flats.inspect
-    flats_to_mark_sold = @connection.get_all_flats - @active_flats
+    flats_to_mark_sold = @connection.get_all_flats.keys - @active_flats
     flats_to_mark_sold.each do |flat|
-      @connection.update_status(flat, 'sold')
+      # @connection.update_status(flat, 'sold')
       puts "#{flat} to mark as sold"
     end
   end
@@ -92,15 +91,76 @@ end
 
 # tvoya stalica crawler
 class TSCrawler < FlatCrawler
+  def initialize(connection)
+    @connection = connection
+    @rooms = [1]
+    @price = [20_000, 60_000]
+    @step = 10_000
+    # Areas should be a list of areas,
+    # here is the full list:
+    # "avtozavod",  "akademiya-nauk",  "angarskaya",
+    # "aerodromnaya-mogilevskaya-voronyanskogo", "brilevichi-druzhba",
+    # "velozavod", "vesnyanka", "voennyy-gorodok-uruche",
+    # "volgogradskaya-nezavisimosti-sevastopolskaya", "vostok", "grushevka",
+    # "dzerzhinskogo-umanskaya-zheleznodorozhnaya", "dombrovka",  "z-gorka-pl-ya-kolasa",
+    # "zavodskoy-rayon", "zapad", "zelenyy-lug",
+    # "kalvariyskaya-kharkovskaya-pushkina", "kamennaya-gorka",
+    # "kirova-marksa", "kozlova-zakharova", "komarovka",
+    # "kommunisticheskaya-storozhevskaya-opernyy", "kuntsevshchina",
+    # "kurasovshchina-", "lebyazhiy", "leninskiy-rayon", "loshitsa",
+    # "makaenka-nezavisimosti-filimonova", "malinovka", "malyy-trostenets",
+    # "masyukovshchina", "mayakovskogo", "mendeleeva-stoletova",
+    # "mikhalovo", "moskovskiy-rayon", "odoevskogo-pushkina-pritytskogo",
+    # "oktyabrskiy-rayon", "partizanskiy-rayon", "pervomayskiy-rayon",
+    # "prigorod", "pushkina-glebki-olshevskogo-pritytskogo",
+    # "r-lyuksemburg-k-libknekhta-rozochka",
+    # "romanovskaya-sloboda-gorodskoy-val-myasnikova", "sedykh-tikotskogo",
+    # "serebryanka", "serogo-asanalieva", "sovetskiy-rayon", "sokol",
+    # "stepyanka", "surganova-bedy-bogdanovicha", "sukharevo",
+    # "timiryazeva-pobediteley-masherova", "traktornyy-zavod",
+    # "univermag-belarus", "uruche", "frunzenskiy-rayon",
+    # "tsentralnyy-rayon", "tsna", "chervyakova-shevchenko-kropotkina",
+    # "chizhovka", "shabany", "yugo-zapad"
+     
+    @areas = %w(
+    akademiya-nauk
+    aerodromnaya-mogilevskaya-voronyanskogo
+    brilevichi-druzhba
+    volgogradskaya-nezavisimosti-sevastopolskaya,
+    vostok,
+    grushevka,
+    dzerzhinskogo-umanskaya-zheleznodorozhnaya,
+    zelenyy-lug,
+    kalvariyskaya-kharkovskaya-pushkina,
+    lebyazhiy,
+    makaenka-nezavisimosti-filimonova,
+    malinovka,
+    masyukovshchina,
+    mayakovskogo,
+    mendeleeva-stoletova,
+    pushkina-glebki-olshevskogo-pritytskogo,
+    sedykh-tikotskogo,
+    surganova-bedy-bogdanovicha,
+    sukharevo,
+    uruche,
+    tsna,
+    chervyakova-shevchenko-kropotkina,
+    yugo-zapad
+    )
+    @years = [0, 2_017]
+    @keywords = ''
+    @page_urls = []
+    @active_flats = []
+  end
+
   def generate_urls
     @areas.each do |area|
-      (@price[0]..@price[1]).step(@step) do |pr|
-        page_url = 'http://www.t-s.by/buy/flats/?'
-        # @rooms.each { |room| page_url += "rooms[#{room}]=#{room}&" }
-        page_url += "area[#{area}]=#{area}&"
-        page_url += 'daybefore=1&'
-        page_url += "year[min]=#{@years[0]}&year[max]=#{@years[1]}&"
-        page_url += "price[min]=#{pr}&price[max]=#{pr + @step}&keywords="
+      (@price[0]..@price[0]).step(@step) do |pr|
+        page_url = 'http://www.t-s.by/buy/flats/filter/'
+        page_url += "district-is-#{area}/"
+        # page_url += 'daybefore=1&'
+        # page_url += "year[min]=#{@years[0]}&year[max]=#{@years[1]}&"
+        # page_url += "price[min]=#{pr}&price[max]=#{pr + @step}&keywords="
         @page_urls += [page_url]
       end
     end
@@ -111,14 +171,17 @@ class TSCrawler < FlatCrawler
     @page_urls.each do |url|
       log "Crawling on URL: #{url}", 4
       area = url.gsub(/=.*$/,'').gsub(/^.*area\[/,'').gsub(']','').to_i
+      # page = Nokogiri::HTML(File.open('page_example.html','r'))
       page = Nokogiri::HTML(open(url))
-      flats = page.css('ul#pager-list').css('li')
+      flats = page.css("div.container .content .col-md-8 #viewcatalog\
+           [class='row change-columns'] [class='col-sm-4 col-md-4  map-point']")
+      # puts "Number of flats found: #{flats.size}"
       flats.each do |flat|
-        address = flat.css('td[class=address]').css('span').text
-        price = flat.css('td').css('div.usd_price')[0].text.gsub(/[^\d]/, '').to_i
-        rooms = flat.css('td[class=rooms]').text.gsub(' ', '').gsub(/\t/, '').sub(/\n/, '')
-        year = flat.css('td[class=year]').text.to_i
-        code = flat.css('td[class=code]').text.to_i
+        address = flat.css('a .caption h4').text
+        price = flat.css('a .caption .virtual-tour__priceusd').text.gsub(/[^\d]/, '').to_i
+        rooms = flat.css('a .caption .virtual-tour__rooms').text.gsub(/[^\d]/, '')
+        year = flat.css('a .caption .virtual-tour__date').text.to_i
+        code = flat.css('a')[0]['href'].gsub(/[^\d]/, '').to_i
         update_price(code, area, address, price, rooms, year)
         @active_flats << code
       end
@@ -127,9 +190,9 @@ class TSCrawler < FlatCrawler
   end
 end
 
-connection = DBConnector.new('localhost', 'flats', 'flat', 'flat')
+connection = JSONConnector.new('1.json')
 
 ts = TSCrawler.new(connection)
 ts.parse_flats
-# ts.full_reindex
+# # ts.full_reindex
 connection.close

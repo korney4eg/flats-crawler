@@ -1,6 +1,6 @@
 #!/usr/bin/ruby -w
-require 'mysql2'
-require './connector'
+#require 'mysql2'
+require './lib/connector-json.rb'
 # require './logger'
 # include Logger
 
@@ -22,6 +22,7 @@ def render_html(flats, days)
   puts("\t\t<TD>год постройки")
   days.each { |day| puts("\t\t<TD>#{day}") }
   flats.each_pair do |code, info|
+    # puts "checking flat #{code}"
     i += 1
     days_arr = []
     days.each do |day|
@@ -84,29 +85,11 @@ def render(flats, days)
   end
 end
 
-con = Mysql2::Client.new(host: 'localhost', username: 'flat',
-                         password: 'flat', database: 'flats')
-dates = con.query('SELECT distinct date from price_history order by date desc;')
-days = []
-i = 0
-flats = {}
-con.query('SELECT * from global where area in (32, 33, 36, 40, 41, 43) ORDER BY price;').each do |sets|
-  i += 1
-  flats[sets['code']] = { 'address' => sets['address'],
-                          'price'  => sets['price'],
-                          'rooms'  => sets['rooms'],
-                          'year'   => sets['year'],
-                          'status'   => sets['status'],
-                          'history' => {} }
-  dates.each do |d|
-    days += [d['date']] unless days.include? d['date']
-    prices = con.query("SELECT price,date from price_history
-                       where code = #{sets['code']} order by date desc;")
-    prices.each do |pr|
-      if pr['date'] == d['date']
-        flats[sets['code']]['history'][d['date']] = pr['price']
-      end
-    end
-  end
-end
-render_html(flats, days)
+# con = Mysql2::Client.new(host: 'localhost', username: 'flat',
+#                          password: 'flat', database: 'flats')
+connection = JSONConnector.new('1.json')
+
+flats = connection.get_all_flats
+dates = connection.get_dates
+# puts "Dates are: #{ dates }"
+render_html(flats, dates)
