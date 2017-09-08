@@ -10,10 +10,7 @@ site-gen.rb - html generator script
 
 To use scripts you need to install following:
 ```
-gem install rubygems
-gem install nokogiri
-gem install open-uri
-gem install mysql2
+gem install rubygems nokogiri open-uri mysql2 json
 ```
 
 Also you need to create database and user in Mysql db-server by running folowing command:
