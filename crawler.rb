@@ -81,9 +81,11 @@ class FlatCrawler
   def mark_sold
     #puts @active_flats.inspect
     #puts @connection.get_all_flats.inspect
-    flats_to_mark_sold = @connection.get_all_flats.keys - @active_flats
+    flats_to_mark_sold = @connection.get_all_flats.keys.sort - @active_flats.sort
+    puts "number of active flats is #{@active_flats.size} flats"
+    puts "Will mark as sold #{flats_to_mark_sold.size} flats"
     flats_to_mark_sold.each do |flat|
-      # @connection.update_status(flat, 'sold')
+      #@connection.update_status(flat, 'sold')
       puts "#{flat} to mark as sold"
     end
   end
@@ -126,25 +128,25 @@ class TSCrawler < FlatCrawler
     akademiya-nauk
     aerodromnaya-mogilevskaya-voronyanskogo
     brilevichi-druzhba
-    volgogradskaya-nezavisimosti-sevastopolskaya,
-    vostok,
-    grushevka,
-    dzerzhinskogo-umanskaya-zheleznodorozhnaya,
-    zelenyy-lug,
-    kalvariyskaya-kharkovskaya-pushkina,
-    lebyazhiy,
-    makaenka-nezavisimosti-filimonova,
-    malinovka,
-    masyukovshchina,
-    mayakovskogo,
-    mendeleeva-stoletova,
-    pushkina-glebki-olshevskogo-pritytskogo,
-    sedykh-tikotskogo,
-    surganova-bedy-bogdanovicha,
-    sukharevo,
-    uruche,
-    tsna,
-    chervyakova-shevchenko-kropotkina,
+    volgogradskaya-nezavisimosti-sevastopolskaya
+    vostok
+    grushevka
+    dzerzhinskogo-umanskaya-zheleznodorozhnaya
+    zelenyy-lug
+    kalvariyskaya-kharkovskaya-pushkina
+    lebyazhiy
+    makaenka-nezavisimosti-filimonova
+    malinovka
+    masyukovshchina
+    mayakovskogo
+    mendeleeva-stoletova
+    pushkina-glebki-olshevskogo-pritytskogo
+    sedykh-tikotskogo
+    surganova-bedy-bogdanovicha
+    sukharevo
+    uruche
+    tsna
+    chervyakova-shevchenko-kropotkina
     yugo-zapad
     )
     @years = [0, 2_017]
@@ -156,7 +158,7 @@ class TSCrawler < FlatCrawler
   def generate_urls
     @areas.each do |area|
       (@price[0]..@price[0]).step(@step) do |pr|
-        page_url = 'http://www.t-s.by/buy/flats/filter/'
+        page_url = 'https://www.t-s.by/buy/flats/filter/'
         page_url += "district-is-#{area}/"
         # page_url += 'daybefore=1&'
         # page_url += "year[min]=#{@years[0]}&year[max]=#{@years[1]}&"
@@ -173,18 +175,21 @@ class TSCrawler < FlatCrawler
       area = url.gsub(/=.*$/,'').gsub(/^.*area\[/,'').gsub(']','').to_i
       # page = Nokogiri::HTML(File.open('page_example.html','r'))
       page = Nokogiri::HTML(open(url))
-      flats = page.css("div.container .content .col-md-8 #viewcatalog\
-           [class='row change-columns'] [class='col-sm-4 col-md-4  map-point']")
-      # puts "Number of flats found: #{flats.size}"
+      flats = page.css("div.container .content .col-md-8 #viewcatalog")
+      flats = flats.css("[class='row change-columns']")
+      flats = flats.css("[class='col-sm-4 col-md-4  map-point']")
+      log "Number of flats found: #{flats.size}"
       flats.each do |flat|
         address = flat.css('a .caption h4').text
         price = flat.css('a .caption .virtual-tour__priceusd').text.gsub(/[^\d]/, '').to_i
         rooms = flat.css('a .caption .virtual-tour__rooms').text.gsub(/[^\d]/, '')
         year = flat.css('a .caption .virtual-tour__date').text.to_i
-        code = flat.css('a')[0]['href'].gsub(/[^\d]/, '').to_i
+        code = flat.css('a')[0]['href'].gsub(/[^\d]/, '')
         update_price(code, area, address, price, rooms, year)
+        log "Checking out flat: #{address} with price #{price}"
         @active_flats << code
       end
+      puts "Updated #{flats.size}/#{flats.size}"
     end
     mark_sold
   end
