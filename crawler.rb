@@ -4,11 +4,11 @@ require 'rubygems'
 require 'nokogiri'
 require 'open-uri'
 require './lib/connector-json.rb'
-require './lib/logger'
+require 'logger'
 
 # Crawler class
 class FlatCrawler
-  include CrLogger
+  include Logger
   def initialize(connection)
     @connection = connection
     @rooms = [1]
@@ -61,7 +61,7 @@ class FlatCrawler
     code_found = @connection.found_code?(code)
     last_price = @connection.get_last_price(code)
     if !code_found
-      log "New flat:#{address} on area #{area} cost #{price}$ #{rooms} rooms, #{year}", 3
+      log.info "New flat:#{address} on area #{area} cost #{price}$ #{rooms} rooms, #{year}", 3
       @connection.add_flat(code, area, address, price, rooms, year)
     elsif price != last_price
       if price < last_price
@@ -79,14 +79,12 @@ class FlatCrawler
   end
   
   def mark_sold
-    #puts @active_flats.inspect
-    #puts @connection.get_all_flats.inspect
     flats_to_mark_sold = @connection.get_all_flats.keys.sort - @active_flats.sort
-    puts "number of active flats is #{@active_flats.size} flats"
-    puts "Will mark as sold #{flats_to_mark_sold.size} flats"
+    log "number of active flats is #{@active_flats.size} flats"
+    log "Will mark as sold #{flats_to_mark_sold.size} flats"
     flats_to_mark_sold.each do |flat|
       #@connection.update_status(flat, 'sold')
-      puts "#{flat} to mark as sold"
+      log "#{flat} to mark as sold"
     end
   end
 end
@@ -171,7 +169,7 @@ class TSCrawler < FlatCrawler
   def parse_flats
     generate_urls
     @page_urls.each do |url|
-      log "Crawling on URL: #{url}", 4
+      log.info "Crawling on URL: #{url}", 4
       area = url.gsub(/=.*$/,'').gsub(/^.*area\[/,'').gsub(']','').to_i
       # page = Nokogiri::HTML(File.open('page_example.html','r'))
       page = Nokogiri::HTML(open(url))
@@ -189,7 +187,7 @@ class TSCrawler < FlatCrawler
         log "Checking out flat: #{address} with price #{price}"
         @active_flats << code
       end
-      puts "Updated #{flats.size}/#{flats.size}"
+      log "Updated #{flats.size}/#{flats.size}"
     end
     mark_sold
   end
