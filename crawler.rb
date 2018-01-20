@@ -4,11 +4,11 @@ require 'rubygems'
 require 'nokogiri'
 require 'open-uri'
 require './lib/connector-json.rb'
-require 'logger'
+require './lib/logger'
 
 # Crawler class
 class FlatCrawler
-  include Logger
+  include CrLogger
   def initialize(connection)
     @connection = connection
     @rooms = [1]
@@ -61,7 +61,7 @@ class FlatCrawler
     code_found = @connection.found_code?(code)
     last_price = @connection.get_last_price(code)
     if !code_found
-      log.info "New flat:#{address} on area #{area} cost #{price}$ #{rooms} rooms, #{year}", 3
+      log "New flat:#{address} on area #{area} cost #{price}$ #{rooms} rooms, #{year}", 3
       @connection.add_flat(code, area, address, price, rooms, year)
     elsif price != last_price
       if price < last_price
@@ -169,7 +169,7 @@ class TSCrawler < FlatCrawler
   def parse_flats
     generate_urls
     @page_urls.each do |url|
-      log.info "Crawling on URL: #{url}", 4
+      log "Crawling on URL: #{url}", 4
       area = url.gsub(/=.*$/,'').gsub(/^.*area\[/,'').gsub(']','').to_i
       # page = Nokogiri::HTML(File.open('page_example.html','r'))
       page = Nokogiri::HTML(open(url))
