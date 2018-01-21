@@ -4,22 +4,28 @@ require 'rubygems'
 require 'nokogiri'
 require 'open-uri'
 require './lib/connector-json.rb'
-require './lib/logger'
+require 'logger'
 
 # Crawler class
 class FlatCrawler
-  include CrLogger
   def initialize(connection)
     @connection = connection
-    @rooms = [1]
-    @price = [20_000, 60_000]
-    @step = 10_000
-    # @areas = [32, 33, 36, 40, 41, 43]
-    @areas = *(1..5)
-    @years = [0, 2_017]
-    @keywords = ''
-    @page_urls = []
-    @active_flats = []
+    read_configuration
+    configre_logging
+    @logger.info '=================================================='
+    
+  end
+
+  def read_configuration
+  end
+
+  def configre_logging
+    file = File.open('./logs/crawler.log', File::WRONLY | File::APPEND)
+    @logger = Logger.new(file)
+    @logger.level = Logger::DEBUG
+    @logger.formatter = proc do |severity, datetime, progname, msg|
+      "#{datetime}|  #{severity}: #{msg}\n"
+    end
   end
 
   def parse_flats
@@ -61,7 +67,7 @@ class FlatCrawler
     code_found = @connection.found_code?(code)
     last_price = @connection.get_last_price(code)
     if !code_found
-      log "New flat:#{address} on area #{area} cost #{price}$ #{rooms} rooms, #{year}", 3
+      @logger.info "New flat:#{address} on area #{area} cost #{price}$ #{rooms} rooms, #{year}"
       @connection.add_flat(code, area, address, price, rooms, year)
     elsif price != last_price
       if price < last_price
@@ -69,32 +75,31 @@ class FlatCrawler
       else
         status = 'up'
       end
-      log "Updated flat:#{code} cost from #{last_price} -> #{price}$", 3
+      @logger.info "Updated flat:#{code} cost from #{last_price} -> #{price}$"
       @connection.add_flat_hist(code, price)
       @connection.update_flat(code, price)
     else
-      log 'nothing to do', 4
+      @logger.debug'nothing to do'
     end
     @connection.update_area(code, area)
   end
   
   def mark_sold
     flats_to_mark_sold = @connection.get_all_flats.keys.sort - @active_flats.sort
-    log "number of active flats is #{@active_flats.size} flats"
-    log "Will mark as sold #{flats_to_mark_sold.size} flats"
-    flats_to_mark_sold.each do |flat|
-      #@connection.update_status(flat, 'sold')
-      log "#{flat} to mark as sold"
-    end
+    @logger.info "number of active flats is #{@active_flats.size} flats"
+    @logger.info "Will mark as sold #{flats_to_mark_sold.size} flats"
+    # flats_to_mark_sold.each do |flat|
+    #    @connection.update_status(flat, 'sold')
+    #    @logger.info "#{flat} to mark as sold"
+    # end
   end
 end
 
 # tvoya stalica crawler
 class TSCrawler < FlatCrawler
-  def initialize(connection)
-    @connection = connection
-    @rooms = [1]
-    @price = [20_000, 60_000]
+  def read_configuration
+    @rooms = [1,2,3]
+    @price = [20_000, 100_000]
     @step = 10_000
     # Areas should be a list of areas,
     # here is the full list:
@@ -147,7 +152,7 @@ class TSCrawler < FlatCrawler
     chervyakova-shevchenko-kropotkina
     yugo-zapad
     )
-    @years = [0, 2_017]
+    @years = [0, 2_018]
     @keywords = ''
     @page_urls = []
     @active_flats = []
@@ -169,14 +174,13 @@ class TSCrawler < FlatCrawler
   def parse_flats
     generate_urls
     @page_urls.each do |url|
-      log "Crawling on URL: #{url}", 4
+      @logger.info "Crawling on URL: #{url}"
       area = url.gsub(/=.*$/,'').gsub(/^.*area\[/,'').gsub(']','').to_i
-      # page = Nokogiri::HTML(File.open('page_example.html','r'))
       page = Nokogiri::HTML(open(url))
       flats = page.css("div.container .content .col-md-8 #viewcatalog")
       flats = flats.css("[class='row change-columns']")
       flats = flats.css("[class='col-sm-4 col-md-4  map-point']")
-      log "Number of flats found: #{flats.size}"
+      @logger.info "Number of flats found: #{flats.size}"
       flats.each do |flat|
         address = flat.css('a .caption h4').text
         price = flat.css('a .caption .virtual-tour__priceusd').text.gsub(/[^\d]/, '').to_i
@@ -184,10 +188,10 @@ class TSCrawler < FlatCrawler
         year = flat.css('a .caption .virtual-tour__date').text.to_i
         code = flat.css('a')[0]['href'].gsub(/[^\d]/, '')
         update_price(code, area, address, price, rooms, year)
-        log "Checking out flat: #{address} with price #{price}"
+        @logger.debug "Checking: |#{address}|#{rooms}|#{year}| -- #{price} $"
         @active_flats << code
       end
-      log "Updated #{flats.size}/#{flats.size}"
+      # @logger.info "Updated #{@active_flats.size}/#{flats.size}"
     end
     mark_sold
   end
