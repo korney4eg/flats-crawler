@@ -1,12 +1,12 @@
 # flats-crawler
 
-##Description
+## Description
 
 crawler.rb - script to grab flats from t-s.by and monitor prices
 
 site-gen.rb - html generator script
 
-##Installation
+## Installation
 
 To use scripts you need to install following:
 ```
@@ -19,7 +19,7 @@ mysql -uroot -p < create_db.sql
 ```
 
 
-##Usage
+## Usage
 ./crawler.rb - will fill database with all the flats
 
 ./site-gen.rb - will generate html site
