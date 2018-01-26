@@ -13,7 +13,7 @@ class FlatCrawler
     @connection = connection
     read_configuration
     configre_logging
-    @logger.info '=================================================='
+    @logger.info "==================================================\n\n\n\n\n"
     
   end
 
