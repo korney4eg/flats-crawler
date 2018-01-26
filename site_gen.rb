@@ -95,4 +95,16 @@ connection = JSONConnector.new('1.json')
 flats = connection.get_all_flats
 dates = connection.get_dates
 # puts "Dates are: #{ dates }"
-render_html(flats, dates)
+input_array = ARGV
+if input_array.size > 0
+  input_array.each do |output_file|
+    render_html(flats, dates, output_file)
+  end
+else
+  render_html(flats, dates)
+end
+
+
+
+
+
