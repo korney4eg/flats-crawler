@@ -1,4 +1,5 @@
 #!/usr/bin/ruby -w
+# encoding: utf-8
 #require 'mysql2'
 require './lib/connector-json.rb'
 # require './logger'
