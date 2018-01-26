@@ -5,25 +5,26 @@ require './lib/connector-json.rb'
 # require './logger'
 # include Logger
 
-def render_html(flats, days)
+def render_html(flats, days,output_file='flats.html')
   i = 0
-  puts('<HTML> <head><title>Flats</title>')
-  puts("<meta http-equiv=\'Content-Type\'
+  file = File.open(output_file, 'a')
+  file.write('<HTML> <head><title>Flats</title>')
+  file.write("<meta http-equiv=\'Content-Type\'
        content=\'text/html; charset=utf-8\'/>")
-  puts('</head>')
-  puts('<BODY>')
-  puts('<TABLE border=1>')
-  puts("\t<TR>")
-  puts("\t\t<TD>#")
-  puts("\t\t<TD>Код")
-  puts("\t\t<TD>Адрес")
-  puts("\t\t<TD>Цена $")
-  puts("\t\t<TD>stat")
-  puts("\t\t<TD>комнат")
-  puts("\t\t<TD>год постройки")
-  days.each { |day| puts("\t\t<TD>#{day}") }
+  file.write('</head>')
+  file.write('<BODY>')
+  file.write('<TABLE border=1>')
+  file.write("\t<TR>")
+  file.write("\t\t<TD>#")
+  file.write("\t\t<TD>Код")
+  file.write("\t\t<TD>Адрес")
+  file.write("\t\t<TD>Цена $")
+  file.write("\t\t<TD>stat")
+  file.write("\t\t<TD>комнат")
+  file.write("\t\t<TD>год постройки")
+  days.each { |day| file.write("\t\t<TD>#{day}") }
   flats.each_pair do |code, info|
-    # puts "checking flat #{code}"
+    # file.write "checking flat #{code}"
     i += 1
     days_arr = []
     days.each do |day|
@@ -33,10 +34,10 @@ def render_html(flats, days)
         days_arr += ['-']
       end
     end
-    puts("\t<TR>")
-    puts("\t\t<TD>#{i}")
-    puts("\t\t<TD>#{code}")
-    puts("\t\t<TD><a href='http://www.t-s.by/buy/flats/#{code}/'"\
+    file.write("\t<TR>")
+    file.write("\t\t<TD>#{i}")
+    file.write("\t\t<TD>#{code}")
+    file.write("\t\t<TD><a href='http://www.t-s.by/buy/flats/#{code}/'"\
          " >#{info['address']}</a>")
     status_char = ''
     if info['status'] == 'down'
@@ -50,14 +51,15 @@ def render_html(flats, days)
     else
       status_char = '&nbsp;'
     end
-    puts("\t\t<TD>#{info['price']}$")
-    puts("\t\t<TD>#{status_char}")
-    puts("\t\t<TD>#{info['rooms']}")
-    puts("\t\t<TD>#{info['year']}")
-    days_arr.each { |day| puts("\t\t<TD>#{day}") }
+    file.write("\t\t<TD>#{info['price']}$")
+    file.write("\t\t<TD>#{status_char}")
+    file.write("\t\t<TD>#{info['rooms']}")
+    file.write("\t\t<TD>#{info['year']}")
+    days_arr.each { |day| file.write("\t\t<TD>#{day}") }
   end
-  puts('</BODY>')
-  puts('<HTML>')
+  file.write('</BODY>')
+  file.write('<HTML>')
+  file.close()
 end
 
 def render(flats, days)
