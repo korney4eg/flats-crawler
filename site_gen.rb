@@ -56,7 +56,10 @@ end
 #                          password: 'flat', database: 'flats')
 connection = JSONConnector.new('1.json')
 
-flats = connection.get_all_flats
+flats = connection.get_all_flats.select{|code, info|\
+          info['year'] > 1990 &&\
+          info['address'].include?('Минск') &&\
+          info['rooms'].to_i >= 1 }
 dates = connection.get_dates.sort
 # puts "Dates are: #{ dates }"
 input_array = ARGV
