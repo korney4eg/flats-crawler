@@ -126,7 +126,6 @@
               <th >год постройки</th>
             </tr> <% sold_flats.each_pair do |code, info| %>
             <tr>
-              <td><%= info['index'] %>
               <td><%= code %>
               <td><a href='https://www.t-s.by/buy/flats/<%= code %>/'><%= info['address'] %></a>
               <td><%= info['price'] %>$
