@@ -21,6 +21,7 @@ class JSONConnector
     @data['flats'][code]['price'] = price
     @data['flats'][code]['rooms'] = rooms
     @data['flats'][code]['year'] = year
+    @data['flats'][code]['status'] = ''
     @data['flats'][code]['history'] = {}
 
     time = Time.now
@@ -43,7 +44,7 @@ class JSONConnector
       0
     end
   end
-  
+
   def get_history
     flats = {}
     dates = get_dates
@@ -82,8 +83,13 @@ class JSONConnector
   def update_area(code, area)
   end
   
+  def update_status(code, status)
+    @data['flats'][code]['status'] = status
+  end
+
   def close
     file = File.new(@filename, 'w' )
     file.write(JSON.dump(@data))
+    file.close
   end
 end

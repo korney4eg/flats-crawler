@@ -38,31 +38,6 @@ class FlatCrawler
   def generate_urls
   end
 
-  def full_reindex
-    flats_from_hist = @connection.get_history
-    all_codes = {}
-    status = {}
-    flats_from_hist.each_pair do |date, flats|
-      flats.each do |flat|
-        flat.each_pair do |code, price|
-          if all_codes.keys.include?(code)
-            if all_codes[code] > price
-              status[code] = 'down'
-            elsif all_codes[code] < price
-              status[code] = 'up'
-            end
-          else
-            status[code] = 'new'
-          end
-          if flats_from_hist.values.last != date && status[code] == 'new'
-            status[code] = ''
-          end
-          all_codes[code] = price
-        end
-      end
-    end
-    all_codes.each_pair { |code, price|  @connection.update_flat(code, price, status[code]) }
-  end
 
   def update_price(code, area, address, price, rooms, year)
     code_found = @connection.found_code?(code)
@@ -71,11 +46,6 @@ class FlatCrawler
       @logger.info "New flat:#{address} on area #{area} cost #{price}$ #{rooms} rooms, #{year}"
       @connection.add_flat(code, area, address, price, rooms, year)
     elsif price != last_price
-      if price < last_price
-        status = 'down'
-      else
-        status = 'up'
-      end
       @logger.info "Updated flat:#{code} cost from #{last_price} -> #{price}$"
       @connection.add_flat_hist(code, price)
       @connection.update_flat(code, price)
@@ -89,10 +59,10 @@ class FlatCrawler
     flats_to_mark_sold = @connection.get_all_flats.keys.sort - @active_flats.sort
     @logger.info "number of active flats is #{@active_flats.size} flats"
     @logger.info "Will mark as sold #{flats_to_mark_sold.size} flats"
-    # flats_to_mark_sold.each do |flat|
-    #    @connection.update_status(flat, 'sold')
-    #    @logger.info "#{flat} to mark as sold"
-    # end
+    flats_to_mark_sold.each do |flat|
+       @connection.update_status(flat, 'sold')
+       @logger.info "#{flat} to mark as sold"
+    end
   end
 end
 
@@ -202,5 +172,4 @@ connection = JSONConnector.new('1.json')
 
 ts = TSCrawler.new(connection)
 ts.parse_flats
-# # ts.full_reindex
 connection.close
