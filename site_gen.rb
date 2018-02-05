@@ -7,8 +7,9 @@ require 'erb'
 def render_from_template(flats, days, template_name, output_file_name='flats.html')
   i = 0
   template = File.read("./templates/#{template_name}")
-  flats.select! {|code, info| info['status'] != 'sold'}
-  flats.each_pair do |code, info|
+  active_flats = flats.select {|code, info| info['status'] != 'sold'}
+  sold_flats = flats.select {|code, info| info['status'] == 'sold'}
+  active_flats.each_pair do |code, info|
     i += 1
     days_arr = []
     days.each do |day|

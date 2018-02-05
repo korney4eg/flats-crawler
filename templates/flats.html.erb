@@ -79,30 +79,46 @@
          }
        }
     </script>
+    <h2> Активные квартиры:</h2>
     <table border=1  id="myTable">
       <tr>
         <th onclick="sortTable(0)">#</th>
         <th onclick="sortTable(1)">код</th>
         <th onclick="sortTable(2)">адрес</th>
         <th onclick="sortTable(3)">цена</th> $
-        <th onclick="sortTable(4)">stat</th>
-        <th onclick="sortTable(5)">комнат</th>
-        <th onclick="sortTable(6)">год постройки</th>
+        <th onclick="sortTable(4)">комнат</th>
+        <th onclick="sortTable(5)">год постройки</th>
         <% days.each_with_index do |day,index|%>
-        <th onclick="sortTable(<%= index + 7 %>)"> <%= day %></th> <% end %>
-      </tr> <% flats.each_pair do |code, info| %>
+        <th onclick="sortTable(<%= index + 6 %>)"> <%= day %></th> <% end %>
+      </tr> <% active_flats.each_pair do |code, info| %>
       <tr>
         <td><%= info['index'] %>
         <td><%= code %>
         <td><a href='https://www.t-s.by/buy/flats/<%= code %>/'><%= info['address'] %></a>
         <td><%= info['price'] %>$
-        <!-- status_charactere here \/ -->
-        <td>&nbsp;
         <td><%= info['rooms'] %>
         <td><%= info['year'] %>
         <% info['price_changes'].each do |day| %>
         <td><%= day %>
         <% end %>
+      <% end %>
+    </table>
+    <h2> Проданные квартиры:</h2>
+    <table border=1>
+      <tr>
+        <th >код</th>
+        <th >адрес</th>
+        <th >цена</th> $
+        <th >комнат</th>
+        <th >год постройки</th>
+      </tr> <% sold_flats.each_pair do |code, info| %>
+      <tr>
+        <td><%= info['index'] %>
+        <td><%= code %>
+        <td><a href='https://www.t-s.by/buy/flats/<%= code %>/'><%= info['address'] %></a>
+        <td><%= info['price'] %>$
+        <td><%= info['rooms'] %>
+        <td><%= info['year'] %>
       <% end %>
     </table>
   </body>
