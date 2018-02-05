@@ -60,7 +60,7 @@ class FlatCrawler
     @logger.info "number of active flats is #{@active_flats.size} flats"
     @logger.info "Will mark as sold #{flats_to_mark_sold.size} flats"
     flats_to_mark_sold.each do |flat|
-       @connection.update_status(flat, 'sold')
+       @connection.mark_sold(flat)
        @logger.info "#{flat} to mark as sold"
     end
   end

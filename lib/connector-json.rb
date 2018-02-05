@@ -87,6 +87,14 @@ class JSONConnector
     @data['flats'][code]['status'] = status
   end
 
+  def mark_sold(code)
+    time = Time.now
+    @data['flats'][code]['status'] = 'sold'
+    if !@data['flats'][code]['sold_date']
+      @data['flats'][code]['sold_date'] = "#{time.year}-#{time.month}-#{time.day}"
+    end
+  end
+
   def close
     file = File.new(@filename, 'w' )
     file.write(JSON.dump(@data))
