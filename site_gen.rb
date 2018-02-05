@@ -11,10 +11,7 @@ def render_from_template(flats, days, template_name, output_file_name='flats.htm
   sold_flats.each_pair do |sold_code, sold_info|
     history = sold_info['history']
     sold_info['selling_start_date'] = history.keys.min
-    puts "Start date #{sold_info['selling_start_date']}"
     sold_info['selling_start_price'] = history[sold_info['selling_start_date']]
-    sold_info['selling_end_date'] = history.keys.max
-    sold_info['selling_end_price'] = history[sold_info['selling_end_date']]
   end
   active_flats = flats.select {|code, info| !info['sold_date'] }
   active_flats.each_pair do |code, info|
