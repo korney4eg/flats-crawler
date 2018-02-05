@@ -2,6 +2,10 @@
   <head>
     <title>Flats</title>
     <meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <style>
     table {
         border-spacing: 0;
@@ -79,47 +83,59 @@
          }
        }
     </script>
-    <h2> Активные квартиры:</h2>
-    <table border=1  id="myTable">
-      <tr>
-        <th onclick="sortTable(0)">#</th>
-        <th onclick="sortTable(1)">код</th>
-        <th onclick="sortTable(2)">адрес</th>
-        <th onclick="sortTable(3)">цена</th> $
-        <th onclick="sortTable(4)">комнат</th>
-        <th onclick="sortTable(5)">год постройки</th>
-        <% days.each_with_index do |day,index|%>
-        <th onclick="sortTable(<%= index + 6 %>)"> <%= day %></th> <% end %>
-      </tr> <% active_flats.each_pair do |code, info| %>
-      <tr>
-        <td><%= info['index'] %>
-        <td><%= code %>
-        <td><a href='https://www.t-s.by/buy/flats/<%= code %>/'><%= info['address'] %></a>
-        <td><%= info['price'] %>$
-        <td><%= info['rooms'] %>
-        <td><%= info['year'] %>
-        <% info['price_changes'].each do |day| %>
-        <td><%= day %>
-        <% end %>
-      <% end %>
-    </table>
-    <h2> Проданные квартиры:</h2>
-    <table border=1>
-      <tr>
-        <th >код</th>
-        <th >адрес</th>
-        <th >цена</th> $
-        <th >комнат</th>
-        <th >год постройки</th>
-      </tr> <% sold_flats.each_pair do |code, info| %>
-      <tr>
-        <td><%= info['index'] %>
-        <td><%= code %>
-        <td><a href='https://www.t-s.by/buy/flats/<%= code %>/'><%= info['address'] %></a>
-        <td><%= info['price'] %>$
-        <td><%= info['rooms'] %>
-        <td><%= info['year'] %>
-      <% end %>
-    </table>
+    <div class="container">
+      <ul class="nav nav-tabs">
+        <li class="active"><a data-toggle="tab" href="#home">Активные квартиры</a></li>
+        <li><a data-toggle="tab" href="#menu1">Проданные квартиры</a></li>
+      </ul>
+      <div class="tab-content">
+        <div id="home" class="tab-pane fade in active">
+          <h2> Активные квартиры:</h2>
+          <table border=1  id="myTable">
+            <tr>
+              <th onclick="sortTable(0)">#</th>
+              <th onclick="sortTable(1)">код</th>
+              <th onclick="sortTable(2)">адрес</th>
+              <th onclick="sortTable(3)">цена</th> $
+              <th onclick="sortTable(4)">комнат</th>
+              <th onclick="sortTable(5)">год постройки</th>
+              <% days.each_with_index do |day,index|%>
+              <th onclick="sortTable(<%= index + 6 %>)"> <%= day %></th> <% end %>
+            </tr> <% active_flats.each_pair do |code, info| %>
+            <tr>
+              <td><%= info['index'] %>
+              <td><%= code %>
+              <td><a href='https://www.t-s.by/buy/flats/<%= code %>/'><%= info['address'] %></a>
+              <td><%= info['price'] %>$
+              <td><%= info['rooms'] %>
+              <td><%= info['year'] %>
+              <% info['price_changes'].each do |day| %>
+              <td><%= day %>
+              <% end %>
+            <% end %>
+          </table>
+          </div>
+          <div id="menu1" class="tab-pane fade">
+          <h2> Проданные квартиры:</h2>
+          <table border=1>
+            <tr>
+              <th >код</th>
+              <th >адрес</th>
+              <th >цена</th> $
+              <th >комнат</th>
+              <th >год постройки</th>
+            </tr> <% sold_flats.each_pair do |code, info| %>
+            <tr>
+              <td><%= info['index'] %>
+              <td><%= code %>
+              <td><a href='https://www.t-s.by/buy/flats/<%= code %>/'><%= info['address'] %></a>
+              <td><%= info['price'] %>$
+              <td><%= info['rooms'] %>
+              <td><%= info['year'] %>
+            <% end %>
+          </table>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
