@@ -87,6 +87,7 @@
       <ul class="nav nav-tabs">
         <li class="active"><a data-toggle="tab" href="#home">Активные квартиры</a></li>
         <li><a data-toggle="tab" href="#menu1">Проданные квартиры</a></li>
+        <li><a data-toggle="tab" href="#menu2">История</a></li>
       </ul>
       <div class="tab-content">
         <div id="home" class="tab-pane fade in active">
@@ -116,30 +117,44 @@
           </table>
           </div>
           <div id="menu1" class="tab-pane fade">
-          <h2> Проданные квартиры:</h2>
-          <table border=1>
-            <tr>
-              <th >код</th>
-              <th >адрес</th>
-              <th >комнат</th>
-              <th >год постройки</th>
-              <th >цена нач.</th> $
-              <th >выставлена на продажу</th> $
-              <th >цена кон.</th> $
-              <th >куплена</th> $
-            </tr> <% sold_flats.each_pair do |code, sold_info| %>
-            <tr>
-              <td><%= code %>
-              <td><a href='https://www.t-s.by/buy/flats/<%= code %>/'><%= sold_info['address'] %></a>
-              <td><%= sold_info['rooms'] %>
-              <td><%= sold_info['year'] %>
-              <td><%= sold_info['selling_start_price'] %>$
-              <td><%= sold_info['selling_start_date'] %>
-              <td><%= sold_info['price'] %>$
-              <td><%= sold_info['sold_date'] %>
-            <% end %>
-          </table>
-        </div>
+            <h2> Проданные квартиры:</h2>
+            <table border=1>
+              <tr>
+                <th >код</th>
+                <th >адрес</th>
+                <th >комнат</th>
+                <th >год постройки</th>
+                <th >цена нач.</th> $
+                <th >выставлена на продажу</th> $
+                <th >цена кон.</th> $
+                <th >куплена</th> $
+              </tr> <% sold_flats.each_pair do |code, sold_info| %>
+              <tr>
+                <td><%= code %>
+                <td><a href='https://www.t-s.by/buy/flats/<%= code %>/'><%= sold_info['address'] %></a>
+                <td><%= sold_info['rooms'] %>
+                <td><%= sold_info['year'] %>
+                <td><%= sold_info['selling_start_price'] %>$
+                <td><%= sold_info['selling_start_date'] %>
+                <td><%= sold_info['price'] %>$
+                <td><%= sold_info['sold_date'] %>
+              <% end %>
+            </table>
+          </div>
+          <div id="menu2" class="tab-pane fade">
+          <h2>История квартир:</h2>
+            <% days.each_with_index do |day,index|%>
+              <h3><%= day %>:</h3>
+              <% flats.each_pair do |code, info| %>
+                <% if info['history'].include?(day)%>
+                <%= info['rooms']%>-я 
+                квартира на <a href='https://www.t-s.by/buy/flats/<%= code %>/'><%= info['address'].sub('Минск, ','') %></a> 
+                <%= info['year']%> г. <%= get_flats_status(info,day)%>
+                <br>
+                <% end %>
+              <% end %>
+            <%end%>
+          </div>
       </div>
     </div>
   </body>
