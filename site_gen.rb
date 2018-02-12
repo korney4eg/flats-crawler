@@ -7,12 +7,11 @@ require 'erb'
 def get_changing_dates(flats)
   changing_dates = []
   flats.values.each do |flat|
-    # puts flat['history']
     flat['history'].keys.each do |date|
       changing_dates << date if not changing_dates.include?(date)
     end
   end
-  changing_dates
+  changing_dates.sort{|x,y| y <=> x}
 end
 
 def get_sold_flats(flats)
@@ -72,11 +71,11 @@ end
 def render_from_template(flats, template_name, output_file_name='flats.html')
   sold_flats = get_sold_flats(flats)
   active_flats = get_active_flats(flats)
-  days = get_changing_dates(active_flats).sort{|x,y| y <=> x}
+  days = get_changing_dates(active_flats)
 
   template = File.read("./templates/#{template_name}")
   output_file = File.new( output_file_name, 'w')
-  output_file.write ERB.new(template,nil, "%<>").result(binding)
+  output_file.write ERB.new(template,nil, "-").result(binding)
 end
 
 def render(flats, days)
