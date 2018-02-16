@@ -60,14 +60,6 @@ class JSONConnector
   end
 
   def get_dates
-    dates = []
-    @data['flats'].values.each do |flat|
-      # puts flat['history']
-      flat['history'].keys.each do |date|
-        dates << date if not dates.include?(date)
-      end
-    end
-    dates
   end
 
   def get_all_flats
@@ -92,7 +84,15 @@ class JSONConnector
     @data['flats'][code]['status'] = 'sold'
     if !@data['flats'][code]['sold_date']
       @data['flats'][code]['sold_date'] = "#{time.year}-#{time.month}-#{time.day}"
+      return true
+    else
+      return false
     end
+  end
+
+  def mark_unsold(code)
+    @data['flats'][code].delete('sold_date')
+    @data['flats'][code].delete('status')
   end
 
   def close

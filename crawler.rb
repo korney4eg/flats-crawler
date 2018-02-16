@@ -52,16 +52,18 @@ class FlatCrawler
     else
       @logger.debug'nothing to do'
     end
+    @connection.mark_unsold(code)
     @connection.update_area(code, area)
   end
   
   def mark_sold
     flats_to_mark_sold = @connection.get_all_flats.keys.sort - @active_flats.sort
     @logger.info "number of active flats is #{@active_flats.size} flats"
-    @logger.info "Will mark as sold #{flats_to_mark_sold.size} flats"
+    # @logger.info "Will mark as sold #{flats_to_mark_sold.size} flats"
     flats_to_mark_sold.each do |flat|
-       @connection.mark_sold(flat)
-       @logger.info "#{flat} to mark as sold"
+       if @connection.mark_sold(flat)
+         @logger.info "#{flat} to mark as sold"
+       end
     end
   end
 end
@@ -148,16 +150,15 @@ class TSCrawler < FlatCrawler
       @logger.info "Crawling on URL: #{url}"
       area = url.gsub(/=.*$/,'').gsub(/^.*area\[/,'').gsub(']','').to_i
       page = Nokogiri::HTML(open(url))
-      flats = page.css("div.container .content .col-md-8 #viewcatalog")
-      flats = flats.css("[class='row change-columns']")
-      flats = flats.css("[class='col-sm-4 col-md-4  map-point']")
+      flats = page.search('[class="flist__maplist-item paginator-item"]')
       @logger.info "Number of flats found: #{flats.size}"
       flats.each do |flat|
-        address = flat.css('a .caption h4').text
-        price = flat.css('a .caption .virtual-tour__priceusd').text.gsub(/[^\d]/, '').to_i
-        rooms = flat.css('a .caption .virtual-tour__rooms').text.gsub(/[^\d]/, '')
-        year = flat.css('a .caption .virtual-tour__date').text.to_i
+        address = flat.css('[class="flist__maplist-item-props-name"]').text.gsub(/^[^,]*, /, '').gsub(/ *$/,'')
+        price = flat.css('[class="flist__maplist-item-props-price-usd"]').text.gsub(/[^\d]*/,'').to_i
+        rooms = flat.css('[class="flist__maplist-item-props-name"]').text.gsub(/-.*$/,'')
+        year = flat.css('[class="flist__maplist-item-props-years"]').text.to_i
         code = flat.css('a')[0]['href'].gsub(/[^\d]/, '')
+
         update_price(code, area, address, price, rooms, year)
         @logger.debug "Checking: |#{address}|#{rooms}|#{year}| -- #{price} $"
         @active_flats << code
