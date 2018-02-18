@@ -23,7 +23,7 @@ class FlatCrawler
   def configre_logging
     file = File.open('./logs/crawler.log', 'a')
     @logger = Logger.new(file)
-    @logger.level = Logger::DEBUG
+    @logger.level = Logger::INFO
     @logger.formatter = proc do |severity, datetime, progname, msg|
       "#{datetime}|  #{severity}: #{msg}\n"
     end
