@@ -23,7 +23,7 @@ class FlatCrawler
   def configre_logging
     file = File.open('./logs/crawler.log', 'a')
     @logger = Logger.new(file)
-    @logger.level = Logger::INFO
+    @logger.level = Logger::DEBUG
     @logger.formatter = proc do |severity, datetime, progname, msg|
       "#{datetime}|  #{severity}: #{msg}\n"
     end
@@ -159,9 +159,13 @@ class TSCrawler < FlatCrawler
         year = flat.css('[class="flist__maplist-item-props-years"]').text.to_i
         code = flat.css('a')[0]['href'].gsub(/[^\d]/, '')
 
-        update_price(code, area, address, price, rooms, year)
         @logger.debug "Checking: |#{address}|#{rooms}|#{year}| -- #{price} $"
-        @active_flats << code
+        if ! @active_flats.include?(code)
+          @active_flats << code
+          update_price(code, area, address, price, rooms, year)
+        else
+          @logger.debug "Flat had been already parsed"
+        end
       end
       # @logger.info "Updated #{@active_flats.size}/#{flats.size}"
     end
