@@ -200,18 +200,24 @@ ts.parse_flats
 messages = ts.get_messages
 message = ""
 messages.each_key do |m_k|
-  message += "*#{m_k}*\n"
-  i = 0
-  messages[m_k].each do |mes|
-    message += "#{ mes }\n"
-    i += 1
-    if message.size > 4000
-      send_message message
-      message = ""
+  if messages[m_k].size > 0
+    message += "*#{m_k}*\n"
+    i = 0
+    messages[m_k].each do |mes|
+      message += "#{ mes }\n"
+      i += 1
+      if message.size > 4000
+        send_message message
+        message = ""
+      end
     end
   end
 end
-send_message message
+if message.size > 0
+  send_message message 
+else
+  send_message "No updates from *#{Socket.gethostname}*"
+end
 
 
 connection.close
