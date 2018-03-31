@@ -6,6 +6,18 @@ require 'nokogiri'
 require 'open-uri'
 require './lib/connector-json.rb'
 require 'logger'
+require 'net/http'
+
+def send_message(message)
+  bot_token = ENV['BOT_TOKEN'] || 'unset'
+  chat_id = ENV['CHAT_ID']|| 'unset'
+
+  if bot_token != 'unset' and chat_id != 'unset'
+    req = Net::HTTP.post_form(URI.parse("https://api.telegram.org/bot#{bot_token}/sendMessage"), {"parse_mode" => "markdown","chat_id" => chat_id,"text" => message})
+#    puts req.body
+  end
+end
+
 
 # Crawler class
 class FlatCrawler
@@ -14,6 +26,7 @@ class FlatCrawler
     read_configuration
     configre_logging
     @logger.info "==================================================\n\n\n\n\n"
+    @messages = { 'New flats:' => [], 'Updated flats:' => [], 'Sold flats:' => [] }
     
   end
 
@@ -38,15 +51,21 @@ class FlatCrawler
   def generate_urls
   end
 
+  def get_messages
+    return @messages
+  end
+
 
   def update_price(code, area, address, price, rooms, year)
     code_found = @connection.found_code?(code)
     last_price = @connection.get_last_price(code)
     if !code_found
       @logger.info "New flat:#{address} on area #{area} cost #{price}$ #{rooms} rooms, #{year}"
+      @messages['New flats:'] << "[ #{address} ](https://www.t-s.by/buy/flats/#{code}) ,cost #{price}\$ #{rooms} rooms, #{year}"
       @connection.add_flat(code, area, address, price, rooms, year)
     elsif price != last_price
       @logger.info "Updated flat:#{code} cost from #{last_price} -> #{price}$"
+      messages['Updated flats:'] << "#{code} cost from #{last_price} -> #{price}$"
       @connection.add_flat_hist(code, price)
       @connection.update_flat(code, price)
     else
@@ -63,6 +82,7 @@ class FlatCrawler
     flats_to_mark_sold.each do |flat|
        if @connection.mark_sold(flat)
          @logger.info "#{flat} to mark as sold"
+         messages['Sold flats:'] << "#{code} sold with price #{price}$"
        end
     end
   end
@@ -153,9 +173,9 @@ class TSCrawler < FlatCrawler
       flats = page.search('[class="flist__maplist-item paginator-item"]')
       @logger.info "Number of flats found: #{flats.size}"
       flats.each do |flat|
-        address = flat.css('[class="flist__maplist-item-props-name"]').text.gsub(/^[^,]*, /, '').gsub(/ *$/,'')
+        address = flat.css('[class="flist__maplist-item-props-name"]').text.gsub(/^[^,]*, /, '').gsub(/ *$/,'').strip
         price = flat.css('[class="flist__maplist-item-props-price-usd"]').text.gsub(/[^\d]*/,'').to_i
-        rooms = flat.css('[class="flist__maplist-item-props-name"]').text.gsub(/-.*$/,'')
+        rooms = flat.css('[class="flist__maplist-item-props-name"]').text.gsub(/-.*$/,'').to_i
         year = flat.css('[class="flist__maplist-item-props-years"]').text.to_i
         code = flat.css('a')[0]['href'].gsub(/[^\d]/, '')
 
@@ -177,4 +197,21 @@ connection = JSONConnector.new('1.json')
 
 ts = TSCrawler.new(connection)
 ts.parse_flats
+messages = ts.get_messages
+message = ""
+messages.each_key do |m_k|
+  message += "*#{m_k}*\n"
+  i = 0
+  messages[m_k].each do |mes|
+    message += "#{ mes }\n"
+    i += 1
+    if message.size > 4000
+      send_message message
+      message = ""
+    end
+  end
+end
+send_message message
+
+
 connection.close
