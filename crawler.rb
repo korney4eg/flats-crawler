@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby -w
 # encoding: utf-8
 
 require 'rubygems'
