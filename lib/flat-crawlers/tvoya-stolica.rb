@@ -82,7 +82,7 @@ class TSCrawler < FlatCrawler
       @logger.info "Crawling on URL: #{url}"
       area = url.gsub(/=.*$/,'').gsub(/^.*area\[/,'').gsub(']','').to_i
       page = Nokogiri::HTML(open(url))
-      flats = page.search('[class="flist__maplist-item paginator-item"]')
+      flats = page.search('[class="flist__maplist-item paginator-item js-maphover"]')
       @logger.info "Number of flats found: #{flats.size}"
       flats.each do |flat|
         address = flat.css('[class="flist__maplist-item-props-name"]').text.gsub(/^[^,]*, /, '').gsub(/ *$/,'').strip
