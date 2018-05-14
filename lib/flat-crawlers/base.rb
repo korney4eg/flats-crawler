@@ -44,7 +44,7 @@ class FlatCrawler
       @connection.add_flat(code, area, address, price, rooms, year)
     elsif price != last_price
       @logger.info "Updated flat:#{code} cost from #{last_price} -> #{price}$"
-      messages['Updated flats:'] << "#{code} cost from #{last_price} -> #{price}$"
+      @messages['Updated flats:'] << "#{code} cost from #{last_price} -> #{price}$"
       @connection.add_flat_hist(code, price)
       @connection.update_flat(code, price)
     else
