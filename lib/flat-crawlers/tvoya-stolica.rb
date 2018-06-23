@@ -33,14 +33,13 @@ class TSCrawler < FlatCrawler
     # "chizhovka", "shabany", "yugo-zapad"
      
     @areas = %w(
-    akademiya-nauk
     aerodromnaya-mogilevskaya-voronyanskogo
+    akademiya-nauk
     brilevichi-druzhba
-    volgogradskaya-nezavisimosti-sevastopolskaya
-    vostok
-    grushevka
+    chervyakova-shevchenko-kropotkina
     dzerzhinskogo-umanskaya-zheleznodorozhnaya
-    zelenyy-lug
+    frunzenskiy-rayon
+    grushevka
     kalvariyskaya-kharkovskaya-pushkina
     lebyazhiy
     makaenka-nezavisimosti-filimonova
@@ -48,14 +47,26 @@ class TSCrawler < FlatCrawler
     masyukovshchina
     mayakovskogo
     mendeleeva-stoletova
+    moskovskiy-rayon
+    odoevskogo-pushkina-pritytskogo
+    pervomayskiy-rayon
     pushkina-glebki-olshevskogo-pritytskogo
+    r-lyuksemburg-k-libknekhta-rozochka
+    romanovskaya-sloboda-gorodskoy-val-myasnikova
     sedykh-tikotskogo
-    surganova-bedy-bogdanovicha
+    sovetskiy-rayon
     sukharevo
-    uruche
+    surganova-bedy-bogdanovicha
+    timiryazeva-pobediteley-masherova
+    tsentralnyy-rayon
     tsna
-    chervyakova-shevchenko-kropotkina
+    uruche
+    voennyy-gorodok-uruche
+    volgogradskaya-nezavisimosti-sevastopolskaya
+    vostok
     yugo-zapad
+    z-gorka-pl-ya-kolasa
+    zelenyy-lug
     )
     @years = [0, 2_018]
     @keywords = ''
