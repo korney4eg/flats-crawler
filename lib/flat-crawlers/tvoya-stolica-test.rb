@@ -41,7 +41,7 @@ class TSTestCrawler < FlatCrawler
     generate_urls
     @page_urls.each do |url|
       @logger.info "Crawling on URL: #{url}"
-      # area = url.gsub(/=.*$/,'').gsub(/^.*area\[/,'').gsub(']','').to_i
+      area = url.gsub(/^.*district-is-/,'').sub('/','')
       page = Nokogiri::HTML(open(url))
       flats = page.search('[class="flist__maplist-item paginator-item js-maphover"]')
       @logger.info "Number of flats found: #{flats.size}"
@@ -52,6 +52,13 @@ class TSTestCrawler < FlatCrawler
         year = flat.css('[class="flist__maplist-item-props-years"]').text.to_i
         code = flat.css('a')[0]['href'].gsub(/[^\d]/, '')
         @logger.info "Checking: code='#{code}'|address = '#{address}'|rooms='#{rooms}'|year = '#{year}'| -- price ='#{price}' $"
+        @logger.debug "Checking: |#{address}|#{rooms}|#{year}| -- #{price} $"
+        if ! @active_flats.include?(code)
+          @active_flats << code
+          update_price(code, area, address, price, rooms, year)
+        else
+          @logger.debug "Flat had been already parsed"
+        end
       end
       # @logger.info "Updated #{@active_flats.size}/#{flats.size}"
     end

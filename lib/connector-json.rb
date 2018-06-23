@@ -73,6 +73,7 @@ class JSONConnector
   end
 
   def update_area(code, area)
+    @data['flats'][code]['area'] = area
   end
   
   def update_status(code, status)
