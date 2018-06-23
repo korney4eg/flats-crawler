@@ -111,7 +111,7 @@ class JSONConnector
 
   def close
     file = File.new(@filename, 'w' )
-    file.write(JSON.dump(@data))
+    file.write(JSON.pretty_generate(@data))
     file.close
   end
 end
