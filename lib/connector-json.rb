@@ -80,6 +80,10 @@ class JSONConnector
     @data['flats'][code]['status'] = status
   end
 
+  def get_status(code)
+    @data['flats'][code]['status']
+  end
+
   def mark_sold(code)
     @data['flats'][code]['status'] = 'sold'
     if !@data['flats'][code]['sold_date']

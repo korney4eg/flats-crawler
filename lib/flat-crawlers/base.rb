@@ -1,15 +1,12 @@
+require 'nokogiri'
 # Crawler class
 class FlatCrawler
   def initialize(connection)
     @connection = connection
-    read_configuration
     configre_logging
     @logger.info "==================================================\n\n\n\n\n"
     @messages = { 'New flats:' => [], 'Updated flats:' => [], 'Sold flats:' => [] }
     
-  end
-
-  def read_configuration
   end
 
   def configre_logging
@@ -27,7 +24,7 @@ class FlatCrawler
   def save_flats
   end
 
-  def generate_urls
+  def generate_urls(areas, price, step)
   end
 
   def get_messages
@@ -35,7 +32,7 @@ class FlatCrawler
   end
 
 
-  def update_price(code, area, address, price, rooms, year)
+  def update_flat(code, area, address, price, rooms, year)
     code_found = @connection.found_code?(code)
     last_price = @connection.get_last_price(code)
     if !code_found
@@ -59,15 +56,15 @@ class FlatCrawler
     @connection.update_area(code, area)
   end
   
-  def mark_sold
-    flats_to_mark_sold = @connection.get_all_flats.keys.sort - @active_flats.sort
-    @logger.info "number of active flats is #{@active_flats.size} flats"
+  def mark_sold(active_flats)
+    flats_codes_to_mark_sold = @connection.get_all_flats.keys.sort - active_flats.sort
+    @logger.info "number of active flats is #{active_flats.size} flats"
     # @logger.info "Will mark as sold #{flats_to_mark_sold.size} flats"
-    flats_to_mark_sold.each do |flat|
-       if @connection.mark_sold(flat)
-         @logger.info "#{flat} to mark as sold"
-         @messages['Sold flats:'] << "#{flat['code']} sold with price #{flat[ 'price' ]}$"
-       end
+    flats_codes_to_mark_sold.each do |sold_code|
+      if @connection.mark_sold(sold_code)
+        @logger.info "#{sold_code} to mark as sold"
+        @messages['Sold flats:'] << "#{sold_code} ](https://www.t-s.by/buy/flats/#{sold_code}/) sold with price #{@connection.get_last_price(sold_code)}$"
+      end
     end
   end
 end

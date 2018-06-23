@@ -6,6 +6,7 @@ require 'nokogiri'
 require 'open-uri'
 require './lib/connector-json.rb'
 require './lib/flat-crawlers/tvoya-stolica.rb'
+require "./lib/crawler-configs/tvoya-stolica.rb"
 require 'logger'
 require 'net/http'
 
@@ -21,8 +22,12 @@ end
 
 connection = JSONConnector.new('1.json')
 
+parserConfig = TSConfig.new
+parserConfig.read_configuration
 ts = TSCrawler.new(connection)
-ts.parse_flats
+page_urls = ts.generate_urls(parserConfig.areas, parserConfig.price, parserConfig.step)
+active_flats = ts.parse_flats(page_urls)
+ts.mark_sold(active_flats)
 messages = ts.get_messages
 message = ""
 messages.each_key do |m_k|
