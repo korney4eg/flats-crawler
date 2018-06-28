@@ -46,18 +46,12 @@ class JSONConnector
     end
   end
 
-  def get_history
-    flats = {}
-    dates = get_dates
-    dates.each do |date|
-      flats[date] = []
-      # flats[date] << 
-      @connection.query("select code,price from price_history where date =\
-                        '#{date}';").each do |flat|
-        flats[date] += [ {flat['code'] => flat['price']} ]
-      end
+  def get_history(code)
+    if found_code?(code)
+      @data['flats'][code]['history']
+    else
+      {}
     end
-    flats
   end
 
   def get_dates
