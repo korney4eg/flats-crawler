@@ -45,9 +45,9 @@ class FlatCrawler
       else
         change_symbol = '↗'
       end
-      @logger.info "Updated flat:#{code} #{last_price} #{change_symbol} #{price}$"
       updates = @connection.get_history(code).keys.size
-      @messages['Updated flats:'] << "[ #{address} ](https://www.t-s.by/buy/flats/#{code}/)| #{rooms} rooms | ${updates} upd| #{last_price} #{change_symbol} #{price}$"
+      @logger.info "Updated flat:#{code},#{updates} updates, #{last_price} #{change_symbol} #{price}$"
+      @messages['Updated flats:'] << "[ #{address} ](https://www.t-s.by/buy/flats/#{code}/)| #{rooms} rooms | #{updates} upd| #{last_price} #{change_symbol} #{price}$"
       @connection.add_flat_hist(code, price)
       @connection.update_flat(code, price)
     else
@@ -59,12 +59,13 @@ class FlatCrawler
   
   def mark_sold(active_flats)
     flats_codes_to_mark_sold = @connection.get_all_flats.keys.sort - active_flats.sort
+    updates = @connection.get_history(code).keys.size
     @logger.info "number of active flats is #{active_flats.size} flats"
     # @logger.info "Will mark as sold #{flats_to_mark_sold.size} flats"
     flats_codes_to_mark_sold.each do |sold_code|
       if @connection.mark_sold(sold_code)
-        @logger.info "#{sold_code} to mark as sold| ${updates} upd"
-        @messages['Sold flats:'] << "[#{sold_code}](https://www.t-s.by/buy/flats/#{sold_code}/) sold with price #{@connection.get_last_price(sold_code)}$| ${updates} upd"
+        @logger.info "#{sold_code} to mark as sold| #{updates} upd"
+        @messages['Sold flats:'] << "[#{sold_code}](https://www.t-s.by/buy/flats/#{sold_code}/) sold with price #{@connection.get_last_price(sold_code)}$| #{updates} upd"
       end
     end
   end
