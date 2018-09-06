@@ -31,7 +31,7 @@ class TSCrawler < FlatCrawler
         price = flat.css('[class="flist__maplist-item-props-price-usd"]').text.gsub(/[^\d]*/,'').to_i
         rooms = flat.css('[class="flist__maplist-item-props-name"]').text.gsub(/-.*$/,'').to_i
         year = flat.css('[class="flist__maplist-item-props-years"]').text.to_i
-        code = flat.css('a')[0]['href'].gsub(/[^\d]/, '')
+        code = flat.css('a')[0]['href'].gsub(/^.*-/, '')
 
         @logger.debug "Checking: |#{address}|#{rooms}|#{year}| -- #{price} $"
         if ! active_flats.include?(code)
